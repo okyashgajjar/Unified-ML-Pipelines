@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# MLFlow
+mlruns/
+mlartifacts/
+
+# Temporary uploads
+temp_uploads/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data
+*.csv
+!dataset/*.csv
+
+# Logs
+*.log
+mlflow.db
+
+# UNNECESSARY FILES
+task.md.resolved
+task.txt
+understanding_v1.md.resolved
+walkthrough.md.resolved
