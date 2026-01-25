@@ -142,10 +142,8 @@ print(result.json())
 ## 📖 Documentation
 
 - **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)** - Project philosophy and approach
-- **[understanding_v1.md](understanding_v1.md)** - Model implementation analysis
 - **[summary_v1.1.md](summary_v1.1.md)** - v1.1 improvements summary
-- **[walkthrough.md](walkthrough.md)** - Quick start walkthrough
-
+  
 ## 🧪 Testing
 
 ```bash
