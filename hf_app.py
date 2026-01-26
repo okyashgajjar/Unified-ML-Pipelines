@@ -332,12 +332,88 @@ def display_training_results(results: list):
     # Charts
     col1, col2 = st.columns(2)
     with col1:
-        fig = px.bar(df_success.sort_values('mae'), x='mae', y='model_name', orientation='h', title="MAE (Lower is Better)")
-        st.plotly_chart(fig, use_container_width=True)
+        fig_mae = px.bar(
+            df_success.sort_values('mae'),
+            x='mae',
+            y='model_name',
+            orientation='h',
+            title='Mean Absolute Error (MAE) - Lower is Better',
+            labels={'mae': 'MAE', 'model_name': 'Model'},
+            color='mae',
+            color_continuous_scale='RdYlGn_r'
+        )
+        fig_mae.update_layout(showlegend=False, height=400)
+        st.plotly_chart(fig_mae, use_container_width=True)
     with col2:
-        fig = px.bar(df_success.sort_values('r2', ascending=False), x='r2', y='model_name', orientation='h', title="R² (Higher is Better)")
-        fig.update_layout(showlegend=False, height=400)
-        st.plotly_chart(fig, use_container_width=True)
+        fig_r2 = px.bar(
+            df_success.sort_values('r2', ascending=False),
+            x='r2',
+            y='model_name',
+            orientation='h',
+            title='R² Score - Higher is Better',
+            labels={'r2': 'R² Score', 'model_name': 'Model'},
+            color='r2',
+            color_continuous_scale='RdYlGn'
+        )
+        fig_r2.update_layout(showlegend=False, height=400)
+        st.plotly_chart(fig_r2, use_container_width=True)
+
+    # Metrics comparison radar chart
+    st.subheader("📈 Multi-Metric Comparison")
+    
+    # Normalize metrics for radar chart (0-1 scale)
+    df_radar = df_success.copy()
+    df_radar['mae_norm'] = 1 - (df_radar['mae'] - df_radar['mae'].min()) / (df_radar['mae'].max() - df_radar['mae'].min() + 1e-10)
+    df_radar['rmse_norm'] = 1 - (df_radar['rmse'] - df_radar['rmse'].min()) / (df_radar['rmse'].max() - df_radar['rmse'].min() + 1e-10)
+    df_radar['r2_norm'] = (df_radar['r2'] - df_radar['r2'].min()) / (df_radar['r2'].max() - df_radar['r2'].min() + 1e-10)
+    
+    # Create radar chart for top 5 models
+    top_5 = df_radar.nsmallest(5, 'mae')
+    
+    fig_radar = go.Figure()
+    
+    for _, row in top_5.iterrows():
+        fig_radar.add_trace(go.Scatterpolar(
+            r=[row['mae_norm'], row['rmse_norm'], row['r2_norm']],
+            theta=['MAE', 'RMSE', 'R²'],
+            fill='toself',
+            name=row['model_name']
+        ))
+    
+    fig_radar.update_layout(
+        polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
+        showlegend=True,
+        title="Top 5 Models - Normalized Metrics",
+        height=500
+    )
+    
+    st.plotly_chart(fig_radar, use_container_width=True)
+
+    # Detailed results table with hyperparameters
+    st.subheader("📋 Detailed Results")
+    
+    # Format display columns - include best_params
+    display_cols = ['model_name', 'mae', 'rmse', 'r2', 'mse', 'mape', 'best_params']
+    available_cols = [c for c in display_cols if c in df_success.columns]
+    display_df = df_success[available_cols].copy()
+    display_df = display_df.sort_values('mae')
+    
+    # Format hyperparameters as readable string
+    if 'best_params' in display_df.columns:
+        display_df['best_params'] = display_df['best_params'].apply(
+            lambda x: str(x).replace('model__', '') if x else 'N/A'
+        )
+    
+    st.dataframe(
+        display_df.style.format({
+            'mae': '{:.4f}',
+            'rmse': '{:.4f}',
+            'r2': '{:.4f}',
+            'mse': '{:.4f}'
+        }),
+        use_container_width=True,
+        height=400
+    )
 
     st.divider()
 
@@ -364,14 +440,16 @@ def display_training_results(results: list):
             x='mae', 
             y='rmse',
             color='model_name',
+            hover_data=['r2', 'mape'],
             title='RMSE vs MAE (Closer to diagonal = Less Outlier Sensitivity)',
-            labels={'mae': 'MAE', 'rmse': 'RMSE'}
+            labels={'mae': 'MAE', 'rmse': 'RMSE', 'model_name': 'Model'}
         )
         max_val = max(df_analysis['rmse'].max(), df_analysis['mae'].max())
         fig_scatter.add_shape(
             type='line', x0=0, y0=0, x1=max_val, y1=max_val,
-            line=dict(color='gray', dash='dash'), name='Ideal'
+            line=dict(color='gray', dash='dash'), name='Ideal (No Outliers)'
         )
+        fig_scatter.update_layout(height=400, showlegend=False)
         st.plotly_chart(fig_scatter, use_container_width=True)
         
     with col2:
@@ -382,9 +460,11 @@ def display_training_results(results: list):
             y='model_name',
             orientation='h',
             title='Outlier Sensitivity Score (Lower = Better)',
+            labels={'outlier_sensitivity': 'Sensitivity %', 'model_name': 'Model'},
             color='outlier_sensitivity',
             color_continuous_scale='RdYlGn_r'
         )
+        fig_outlier.update_layout(height=400, showlegend=False)
         st.plotly_chart(fig_outlier, use_container_width=True)
         
     # Issue Detection
@@ -396,27 +476,52 @@ def display_training_results(results: list):
     if not high_sensitivity.empty:
         issues_found = True
         with st.expander("🎯 High Outlier Sensitivity Detected", expanded=True):
-            st.warning(f"**{len(high_sensitivity)} model(s)** show high sensitivity to outliers (>20% above ideal):")
+            st.warning(f"**{len(high_sensitivity)} model(s)** show high sensitivity to outliers:")
             for _, row in high_sensitivity.iterrows():
-                st.write(f"- **{row['model_name']}**: {row['outlier_sensitivity']:.1f}%")
+                st.write(f"- **{row['model_name']}**: {row['outlier_sensitivity']:.1f}% above ideal")
+            st.info("💡 **Suggestion**: Consider removing outliers from your data or use robust models like Ridge/Lasso regression.")
                 
     # Negative R2
     negative_r2 = df_analysis[df_analysis['r2'] < 0]
     if not negative_r2.empty:
         issues_found = True
         with st.expander("❌ Poor Model Fit (Negative R²)", expanded=True):
-            st.error(f"**{len(negative_r2)} model(s)** perform worse than a baseline mean predictor:")
+            st.error(f"**{len(negative_r2)} model(s)** have negative R² (worse than mean baseline):")
             for _, row in negative_r2.iterrows():
                 st.write(f"- **{row['model_name']}**: R² = {row['r2']:.4f}")
+            st.info("💡 **Suggestion**: These models are not suitable for this dataset. Check for data quality issues or feature engineering needs.")
+
+    # Check for high MAPE
+    if 'mape' in df_analysis.columns:
+        try:
+            df_analysis['mape_val'] = df_analysis['mape'].apply(
+                lambda x: float(str(x).replace('%', '')) if x else 0
+            )
+            high_mape = df_analysis[df_analysis['mape_val'] > 50]
+            if not high_mape.empty:
+                issues_found = True
+                with st.expander("📊 High Percentage Error", expanded=False):
+                    st.warning(f"**{len(high_mape)} model(s)** have MAPE > 50%:")
+                    for _, row in high_mape.iterrows():
+                        st.write(f"- **{row['model_name']}**: MAPE = {row['mape']}")
+                    st.info("💡 **Suggestion**: The target variable may have small values near zero, causing inflated percentage errors. Consider log transformation.")
+        except:
+            pass
 
     if not issues_found:
         st.success("✅ No major issues detected! All models show reasonable error patterns.")
 
     st.divider()
+    
+    # Download results
+    csv = df_success.to_csv(index=False)
+    st.download_button(
+        label="📥 Download Results as CSV",
+        data=csv,
+        file_name="model_results.csv",
+        mime="text/csv"
+    )
 
-    # Data Table
-    st.subheader("📋 Detailed Data")
-    st.dataframe(df_success[['model_name', 'mae', 'rmse', 'r2', 'mse']].sort_values('mae'), use_container_width=True)
 
 def show_history_page():
     st.header("Job History")
