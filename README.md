@@ -28,10 +28,12 @@ This application allows you to train multiple families of Machine Learning model
 
 ### Option 1: Use Streamlit Deployed App (Recommended)
 Simply visit the deployed Space and upload your CSV file!
-Link: 
+```bash
+Link: https://unified-ml-pipelines.streamlit.app/
+```
 
 ### Option 2: Local Installation
-```bash
+```bash 
 # Clone the repository
 git clone https://github.com/okyashgajjar/Unified-ML-Pipelines.git
 cd Unified-ML-Pipelines
