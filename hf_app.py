@@ -153,7 +153,7 @@ def run_training_pipeline(df: pd.DataFrame, target_column: str, use_parallel: bo
 def main():
     # Header
     st.markdown('<div class="main-header">🤖 Unified ML Pipelines</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sub-header">Mathematics-Driven ML Pipelines (Hugging Face Edition)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Mathematics-Driven Hyperparameter tuned ML Pipelines</div>', unsafe_allow_html=True)
     
     # Sidebar
     with st.sidebar:
@@ -179,7 +179,7 @@ def show_home_page():
     with col1:
         st.subheader("📚 About")
         st.markdown("""
-        This app demonstrates **Parallel ML Pipelines** running entirely in your browser session (or Hugging Face Space).
+        This app demonstrates **Mathematics-driven Hyperparameter tuned Parallel ML Pipelines**.
         
         **Key Features:**
         - ✅ Consolidated App (Frontend + Backend)
