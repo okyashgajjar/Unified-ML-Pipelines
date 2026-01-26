@@ -179,7 +179,8 @@ def show_home_page():
     with col1:
         st.subheader("📚 About")
         st.markdown("""
-        This app demonstrates **Mathematics-driven Hyperparameter tuned Parallel ML Pipelines**.
+        This app demonstrates **Mathematics driven Hyperparameter tuned Parallel ML Pipelines**
+        At this time we are related to total 11 superwised regression models only, more version will be added soon...
         
         **Key Features:**
         - ✅ Consolidated App (Frontend + Backend)
