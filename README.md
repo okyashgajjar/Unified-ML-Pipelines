@@ -26,14 +26,15 @@ This application allows you to train multiple families of Machine Learning model
 
 ## 🚀 Quick Start
 
-### Option 1: Hugging Face Spaces (Recommended)
+### Option 1: Use Streamlit Deployed App (Recommended)
 Simply visit the deployed Space and upload your CSV file!
+Link: 
 
 ### Option 2: Local Installation
 ```bash
 # Clone the repository
-git clone https://huggingface.co/spaces/YOUR_USERNAME/ml-pipelines
-cd ml-pipelines
+git clone https://github.com/okyashgajjar/Unified-ML-Pipelines.git
+cd Unified-ML-Pipelines
 
 # Install dependencies
 pip install -r requirements.txt
@@ -43,6 +44,7 @@ streamlit run hf_app.py
 ```
 
 ### Option 3: API + Frontend (Development)
+#### Run Frontend and Backend Separately
 ```bash
 # Terminal 1: Start FastAPI backend
 uvicorn app:app --reload
@@ -54,7 +56,7 @@ streamlit run streamlit_app.py
 ## 📚 Project Structure
 
 ```
-ml-pipelines/
+Unified-ML-Pipelines/
 ├── hf_app.py                       # Unified app for HF Spaces
 ├── app.py                          # FastAPI backend
 ├── streamlit_app.py                # Streamlit frontend
