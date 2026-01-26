@@ -41,16 +41,22 @@
 └─────────────────────────────────────────────────────────┘
 ```
 
+**Alternative Deployment (Hugging Face Spaces):**
+The `hf_app.py` merges Frontend and Backend into a single file for monolithic deployment.
+
+
 ---
 
 ## 📁 File Structure
 
 ```
 ml-pipelines/
+ml-pipelines/
 ├── app.py                    # FastAPI backend (REST API)
 ├── streamlit_app.py          # Streamlit frontend (Web UI)
+├── hf_app.py                 # Unified app for Hugging Face Spaces (Backend + Frontend)
 ├── requirements.txt          # Python dependencies
-├── README.md                 # Quick start guide
+├── README.md                 # Hugging Face Spaces configuration
 │
 ├── dataset/
 │   └── Housing.csv          # Sample dataset
@@ -90,7 +96,13 @@ streamlit run streamlit_app.py
 # Running on http://localhost:8501
 ```
 
-### 4. (Optional) MLFlow UI
+### 4. (Optional) Run Unified App (Hugging Face Mode)
+```bash
+streamlit run hf_app.py
+# Running on http://localhost:8501
+```
+
+### 5. (Optional) MLFlow UI
 ```bash
 mlflow ui
 # Running on http://localhost:5000
