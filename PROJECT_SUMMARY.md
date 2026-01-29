@@ -181,25 +181,31 @@ This ensures:
 
 ---
 
-## Current Version Scope (Version 1)
+## Current Version Scope (Version 1.2)
 
 ✔ Tabular data  
-✔ Regression only  
-✔ Four model families  
+✔ Regression pipelines  
+✔ **Classification pipelines** (NEW)  
+✔ Four model families (Regression)  
+✔ Five model families (Classification)  
 ✔ GridSearchCV / RandomizedSearchCV  
 ✔ Multi-metric evaluation  
-✔ MAE-based ranking  
+✔ MAE-based ranking (Regression)  
+✔ Accuracy-based ranking (Classification)  
+✔ **error handling** (NEW)  
+✔ **DataFrame return with status/error** (NEW)
 
 ---
 
 ## Future Expansion
 
-- Classification pipelines
+- ~~Classification pipelines~~ ✅ DONE
 - Time-series pipelines
 - NLP pipelines
 - Unsupervised learning
 - Deep learning & OpenCV workflows
 - Distributed execution
+- Web interface for Classification
 
 ---
 

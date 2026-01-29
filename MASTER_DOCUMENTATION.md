@@ -1,8 +1,8 @@
-# ML Pipelines - Master Documentation v1.1
+# ML Pipelines - Master Documentation v1.2
 
 ## 📦 Project Overview
 
-**Unified ML Pipelines** is a mathematics-driven parallel machine learning system for regression tasks. It trains multiple model families with optimized preprocessing pipelines and provides a complete web interface.
+**Unified ML Pipelines** is a mathematics-driven parallel machine learning system for **regression and classification** tasks. It trains multiple model families with optimized preprocessing pipelines and provides a complete web interface.
 
 ---
 
@@ -71,6 +71,14 @@ ml-pipelines/
 │       ├── parallel_executor.py # Sequential execution
 │       └── mlflow_tracker.py    # MLFlow integration
 │
+├── Superwised_Classification/
+│   └── tabular_data/
+│       ├── weight_class.py      # Logistic Regression, Ridge Classifier
+│       ├── tree_class.py        # DT, RF, GBM, AdaBoost, LightGBM, XGBoost
+│       ├── nn_class.py          # MLP Classifier
+│       ├── kernel_class.py      # SVC (RBF, Linear, Poly)
+│       └── instance_class.py    # KNN Classifier
+│
 └── mlruns/                  # MLFlow experiment data
 ```
 
@@ -118,6 +126,19 @@ mlflow ui
 | **Tree-Based** | DT, RF, XGBoost, GBM | No scaling + OrdinalEncoder | Non-linear patterns |
 | **Neural Network** | MLP Regressor | StandardScaler + OneHotEncoder | Deep patterns |
 | **Instance-Based** | KNN, Radius Neighbors | StandardScaler (numeric only) | Local patterns |
+| **Kernel-Based** | SVC | StandardScaler + OneHotEncoder + PCA | High-dimensional classification |
+
+---
+
+## 🎯 Classification Model Families (New!)
+
+| Family | Models | Preprocessing | Hyperparameter Search |
+|--------|--------|---------------|----------------------|
+| **Weight-Based** | Logistic Regression, Ridge Classifier | StandardScaler + OneHotEncoder + PCA | GridSearchCV |
+| **Tree-Based** | DT, RF, GBM, AdaBoost, LightGBM, XGBoost | OrdinalEncoder (no scaling) | RandomizedSearchCV |
+| **Neural Network** | MLP Classifier | StandardScaler + OneHotEncoder + PCA | RandomizedSearchCV |
+| **Kernel-Based** | SVC | StandardScaler + OneHotEncoder + PCA | RandomizedSearchCV |
+| **Instance-Based** | KNN | StandardScaler (numeric only) | GridSearchCV |
 
 ---
 
@@ -217,7 +238,7 @@ Response: { "total": 5, "jobs": [...] }
 
 ---
 
-## ✅ v1.1 Features Summary
+## ✅ v1.2 Features Summary (2026-01-29)
 
 | Feature | Status |
 |---------|--------|
@@ -228,7 +249,33 @@ Response: { "total": 5, "jobs": [...] }
 | Streamlit Frontend | ✅ |
 | Outlier Analysis | ✅ |
 | Hyperparameters in Results | ✅ |
+| **Classification Pipelines** | ✅ NEW |
+| **Industry-Level Error Handling** | ✅ NEW |
+| **DataFrame Return with Status/Error** | ✅ NEW |
 
 ---
 
-*Last Updated: 2026-01-25*
+## 🆕 v1.2 Changes (2026-01-29)
+
+### Classification Pipelines Added
+- `weight_class.py` - Logistic Regression, Ridge Classifier
+- `tree_class.py` - Decision Tree, Random Forest, Gradient Boosting, AdaBoost, LightGBM
+- `nn_class.py` - MLP Classifier
+- `kernel_class.py` - SVC with RBF, Linear, Poly kernels
+- `instance_class.py` - KNN Classifier
+
+### Error Handling Pattern
+All classification files now use:
+1. **Input Validation** - DataFrame type check, target column check, empty check
+2. **Function-level try-except** - Catches preprocessing/setup errors
+3. **Model-level try-except** - Each model runs independently, failures don't stop others
+4. **DataFrame Return** - Returns results with `status` and `error` columns
+
+### Optimized Param Grids
+- Reduced hyperparameter search space by ~80%
+- 3-fold CV for faster training
+- Industry-optimized default values
+
+---
+
+*Last Updated: 2026-01-29*
