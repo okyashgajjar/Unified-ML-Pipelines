@@ -19,6 +19,13 @@ try:
     from Superwised_Regression.tabular_data.parallel_executor import execute_model_families_sequential
     from Superwised_Regression.tabular_data.mlflow_tracker import MLFlowTracker
     from Superwised_Regression.preprocessing import datacleaning
+    
+    # Classification imports
+    from Superwised_Classification.tabular_data.weight_class import weight_based as weight_based_classifier
+    from Superwised_Classification.tabular_data.tree_class import tree_based as tree_based_classifier
+    from Superwised_Classification.tabular_data.nn_class import neural_network as nn_classifier
+    from Superwised_Classification.tabular_data.kernel_class import kernel_based as kernel_based_classifier
+    from Superwised_Classification.tabular_data.instance_class import instance_based as instance_based_classifier
 except ImportError as e:
     st.error(f"Critical Error: Failed to import ML modules. Make sure you are in the root directory. Error: {e}")
     st.stop()
@@ -148,6 +155,76 @@ def run_training_pipeline(df: pd.DataFrame, target_column: str, use_parallel: bo
         st.session_state['jobs'][job_id]['completed_at'] = datetime.now().isoformat()
         return False, str(e)
 
+def run_classification_pipeline(df: pd.DataFrame, target_column: str, enable_mlflow: bool, job_id: str):
+    """
+    Executes the classification training pipeline synchronously.
+    """
+    try:
+        # Update status
+        st.session_state['jobs'][job_id]['status'] = 'running'
+        st.session_state['jobs'][job_id]['started_at'] = datetime.now().isoformat()
+        
+        # Define classification model families
+        model_functions = [
+            ('Weight-Based Classifiers', weight_based_classifier),
+            ('Tree-Based Classifiers', tree_based_classifier),
+            ('Neural Network Classifiers', nn_classifier),
+            ('Kernel-Based Classifiers', kernel_based_classifier),
+            ('Instance-Based Classifiers', instance_based_classifier)
+        ]
+        
+        # Execute each model family and collect results
+        all_results = []
+        for family_name, func in model_functions:
+            try:
+                family_results = func(df, target_column)
+                all_results.append(family_results)
+            except Exception as family_error:
+                all_results.append(pd.DataFrame([{
+                    'model_name': family_name,
+                    'best_params': None,
+                    'pipeline': None,
+                    'accuracy': None,
+                    'precision': None,
+                    'status': 'failed',
+                    'error': str(family_error)
+                }]))
+        
+        # Combine all results
+        results_df = pd.concat(all_results, ignore_index=True)
+        
+        # Sort by accuracy (descending) - higher is better
+        results_df = results_df.sort_values(by='accuracy', ascending=False, na_position='last')
+        
+        # MLFlow Logging (Optional)
+        if enable_mlflow:
+            try:
+                tracker = MLFlowTracker(experiment_name=f"Classification_Job_{job_id}")
+                for family_name, func in model_functions:
+                    family_results = results_df[results_df['model_name'].str.contains(family_name.split()[0], case=False, na=False)]
+                    if not family_results.empty:
+                        tracker.log_family_results(family_results, family_name)
+            except Exception as e:
+                print(f"MLFlow logging warning: {e}")
+        
+        # Convert results
+        results_dict = results_df.drop(columns=['pipeline'], errors='ignore').to_dict(orient='records')
+        
+        # Update Job Success
+        st.session_state['jobs'][job_id]['status'] = 'completed'
+        st.session_state['jobs'][job_id]['results'] = results_dict
+        st.session_state['jobs'][job_id]['completed_at'] = datetime.now().isoformat()
+        
+        return True, "Classification training completed successfully"
+
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        st.session_state['jobs'][job_id]['status'] = 'failed'
+        st.session_state['jobs'][job_id]['error'] = str(e)
+        st.session_state['jobs'][job_id]['completed_at'] = datetime.now().isoformat()
+        return False, str(e)
+
 # --- UI Functions ---
 
 def main():
@@ -174,15 +251,16 @@ def main():
         show_history_page()
 
 def show_home_page():
-    st.header("Welcome to Unified ML Pipelines")
+    st.header("Welcome to Unified ML Pipelines v2.0")
     col1, col2 = st.columns(2)
     with col1:
         st.subheader("📚 About")
         st.markdown("""
-        This app demonstrates **Mathematics driven Hyperparameter tuned Parallel ML Pipelines**
-        At this time we are related to total 11 superwised regression models only, more version will be added soon...
+        This app demonstrates **Mathematics driven Hyperparameter tuned ML Pipelines**
+        Now supporting both **Regression** and **Classification** tasks!
         
         **Key Features:**
+        - ✅ **Regression & Classification** support
         - ✅ Consolidated App (Frontend + Backend)
         - ✅ Multi-Family Model Training
         - ✅ Automatic Preprocessing
@@ -191,10 +269,18 @@ def show_home_page():
     with col2:
         st.subheader("🎯 Model Families")
         st.markdown("""
-        1. **Weight-Based** (Linear, Ridge, Lasso)
-        2. **Tree-Based** (RF, XGBoost, GBM)
-        3. **Neural Networks** (MLP)
-        4. **Instance-Based** (KNN)
+        **Regression Models:**
+        - Weight-Based (Linear, Ridge, Lasso)
+        - Tree-Based (RF, XGBoost, GBM)
+        - Neural Networks (MLP)
+        - Instance-Based (KNN)
+        
+        **Classification Models:**
+        - Weight-Based (Logistic, Ridge)
+        - Tree-Based (DT, RF, GBM, LightGBM)
+        - Neural Networks (MLP)
+        - Kernel-Based (SVC)
+        - Instance-Based (KNN)
         """)
 
 def show_train_page():
@@ -212,10 +298,16 @@ def show_train_page():
                 st.dataframe(df_preview.head())
             
             # Config
-            col1, col2 = st.columns(2)
+            col1, col2, col3 = st.columns(3)
             with col1:
                 target_column = st.selectbox("Target Column", df_preview.columns.tolist())
             with col2:
+                learning_type = st.selectbox(
+                    "Learning Type",
+                    options=["Regression", "Classification"],
+                    help="Choose Regression for continuous targets, Classification for categorical"
+                )
+            with col3:
                 # Parallel might be unstable on free tiers, keep option but default to what's safe
                 use_parallel = st.checkbox("Use Parallel Execution", value=False, help="May be slower on single-vCPU environments")
             
@@ -228,6 +320,7 @@ def show_train_page():
                     'status': 'queued',
                     'created_at': datetime.now().isoformat(),
                     'target_column': target_column,
+                    'learning_type': learning_type.lower(),
                     'filename': uploaded_file.name
                 }
                 st.session_state['current_job_id'] = job_id
@@ -240,21 +333,25 @@ def show_train_page():
                     f.write(uploaded_file.getvalue())
                 
                 # Run Training (Synchronous with Spinner)
-                with st.spinner("🔄 Preprocessing data and training models... This may take a minute..."):
+                with st.spinner(f"🔄 Preprocessing data and training {learning_type.lower()} models... This may take a minute..."):
                     try:
                         # Clean Data
                         df_clean = datacleaning(temp_path)
                         
-                        # Train
-                        success, message = run_training_pipeline(
-                            df_clean, target_column, use_parallel, enable_mlflow, job_id
-                        )
+                        # Train based on learning type
+                        if learning_type.lower() == "classification":
+                            success, message = run_classification_pipeline(
+                                df_clean, target_column, enable_mlflow, job_id
+                            )
+                        else:
+                            success, message = run_training_pipeline(
+                                df_clean, target_column, use_parallel, enable_mlflow, job_id
+                            )
                         
                         if success:
                             st.balloons()
-                            st.success("✅ Training Completed! Redirecting to results...")
+                            st.success(f"✅ {learning_type} Training Completed!")
                             time.sleep(1)
-                            # Ideally we'd auto-redirect, but user can click tab
                             st.info("Navigate to **📈 View Results** to see the analysis.")
                         else:
                             st.error(f"❌ Training Failed: {message}")
@@ -301,7 +398,7 @@ def show_results_page():
         display_training_results(results)
 
 def display_training_results(results: list):
-    """Reuse the visualization logic"""
+    """Reuse the visualization logic - auto-detects classification vs regression"""
     if not results:
         st.warning("No results to display.")
         return
@@ -313,6 +410,121 @@ def display_training_results(results: list):
         st.error("No models trained successfully.")
         return
 
+    # Detect result type based on available columns
+    is_classification = 'accuracy' in df_success.columns and 'mae' not in df_success.columns
+    
+    if is_classification:
+        display_classification_results(df_success)
+    else:
+        display_regression_results(df_success)
+
+def display_classification_results(df_success: pd.DataFrame):
+    """Display classification results with accuracy/precision metrics"""
+    # Metrics
+    st.subheader("🏆 Top Performing Models (by Accuracy)")
+    top_3 = df_success.nlargest(3, 'accuracy')
+    
+    cols = st.columns(3)
+    for idx, (_, row) in enumerate(top_3.iterrows()):
+        with cols[idx]:
+            acc_val = row['accuracy'] if row['accuracy'] is not None else 0
+            prec_val = row['precision'] if row['precision'] is not None else 0
+            st.markdown(f"""
+            <div class="metric-card">
+                <h4>#{idx+1} {row['model_name']}</h4>
+                <p><b>Accuracy:</b> {acc_val:.4f}</p>
+                <p><b>Precision:</b> {prec_val:.4f}</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+    st.divider()
+    
+    # Charts
+    col1, col2 = st.columns(2)
+    with col1:
+        fig_acc = px.bar(
+            df_success.sort_values('accuracy', ascending=True),
+            x='accuracy',
+            y='model_name',
+            orientation='h',
+            title='Accuracy - Higher is Better',
+            labels={'accuracy': 'Accuracy', 'model_name': 'Model'},
+            color='accuracy',
+            color_continuous_scale='RdYlGn'
+        )
+        fig_acc.update_layout(showlegend=False, height=400)
+        st.plotly_chart(fig_acc, use_container_width=True)
+    with col2:
+        fig_prec = px.bar(
+            df_success.sort_values('precision', ascending=True),
+            x='precision',
+            y='model_name',
+            orientation='h',
+            title='Precision - Higher is Better',
+            labels={'precision': 'Precision', 'model_name': 'Model'},
+            color='precision',
+            color_continuous_scale='RdYlGn'
+        )
+        fig_prec.update_layout(showlegend=False, height=400)
+        st.plotly_chart(fig_prec, use_container_width=True)
+
+    # Radar chart
+    st.subheader("📈 Multi-Metric Comparison")
+    top_5 = df_success.nlargest(5, 'accuracy')
+    
+    fig_radar = go.Figure()
+    for _, row in top_5.iterrows():
+        acc_val = row['accuracy'] if row['accuracy'] is not None else 0
+        prec_val = row['precision'] if row['precision'] is not None else 0
+        fig_radar.add_trace(go.Scatterpolar(
+            r=[acc_val, prec_val],
+            theta=['Accuracy', 'Precision'],
+            fill='toself',
+            name=row['model_name']
+        ))
+    
+    fig_radar.update_layout(
+        polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
+        showlegend=True,
+        title="Top 5 Models - Classification Metrics",
+        height=500
+    )
+    st.plotly_chart(fig_radar, use_container_width=True)
+
+    # Detailed results
+    st.subheader("📋 Detailed Results")
+    display_cols = ['model_name', 'accuracy', 'precision', 'best_params']
+    available_cols = [c for c in display_cols if c in df_success.columns]
+    display_df = df_success[available_cols].copy()
+    display_df = display_df.sort_values('accuracy', ascending=False)
+    
+    if 'best_params' in display_df.columns:
+        display_df['best_params'] = display_df['best_params'].apply(
+            lambda x: str(x).replace('model__', '') if x else 'N/A'
+        )
+    
+    st.dataframe(
+        display_df.style.format({
+            'accuracy': '{:.4f}',
+            'precision': '{:.4f}'
+        }),
+        use_container_width=True,
+        height=400
+    )
+    
+    st.divider()
+    
+    # Download
+    csv = df_success.to_csv(index=False)
+    st.download_button(
+        label="📥 Download Results as CSV",
+        data=csv,
+        file_name="classification_results.csv",
+        mime="text/csv"
+    )
+
+def display_regression_results(df_success: pd.DataFrame):
+    """Display regression results with MAE/R² metrics"""
     # Metrics
     st.subheader("🏆 Top Performing Models")
     top_3 = df_success.nsmallest(3, 'mae')
@@ -359,18 +571,14 @@ def display_training_results(results: list):
         fig_r2.update_layout(showlegend=False, height=400)
         st.plotly_chart(fig_r2, use_container_width=True)
 
-    # Metrics comparison radar chart
+    # Radar chart
     st.subheader("📈 Multi-Metric Comparison")
-    
-    # Normalize metrics for radar chart (0-1 scale)
     df_radar = df_success.copy()
     df_radar['mae_norm'] = 1 - (df_radar['mae'] - df_radar['mae'].min()) / (df_radar['mae'].max() - df_radar['mae'].min() + 1e-10)
     df_radar['rmse_norm'] = 1 - (df_radar['rmse'] - df_radar['rmse'].min()) / (df_radar['rmse'].max() - df_radar['rmse'].min() + 1e-10)
     df_radar['r2_norm'] = (df_radar['r2'] - df_radar['r2'].min()) / (df_radar['r2'].max() - df_radar['r2'].min() + 1e-10)
     
-    # Create radar chart for top 5 models
     top_5 = df_radar.nsmallest(5, 'mae')
-    
     fig_radar = go.Figure()
     
     for _, row in top_5.iterrows():
@@ -387,19 +595,15 @@ def display_training_results(results: list):
         title="Top 5 Models - Normalized Metrics",
         height=500
     )
-    
     st.plotly_chart(fig_radar, use_container_width=True)
 
-    # Detailed results table with hyperparameters
+    # Detailed results
     st.subheader("📋 Detailed Results")
-    
-    # Format display columns - include best_params
     display_cols = ['model_name', 'mae', 'rmse', 'r2', 'mse', 'mape', 'best_params']
     available_cols = [c for c in display_cols if c in df_success.columns]
     display_df = df_success[available_cols].copy()
     display_df = display_df.sort_values('mae')
     
-    # Format hyperparameters as readable string
     if 'best_params' in display_df.columns:
         display_df['best_params'] = display_df['best_params'].apply(
             lambda x: str(x).replace('model__', '') if x else 'N/A'
@@ -417,104 +621,8 @@ def display_training_results(results: list):
     )
 
     st.divider()
-
-    # --- Error Analysis Section ---
-    st.subheader("🔍 Error & Outlier Analysis")
     
-    st.markdown("""
-    This section helps identify models sensitive to outliers and data quality issues.
-    - **RMSE vs MAE Gap**: Large gap indicates sensitivity to outliers (RMSE penalizes large errors more)
-    - **High MAPE**: Indicates issues with small target values or percentage-based errors
-    """)
-    
-    # Calculate error metrics
-    df_analysis = df_success.copy()
-    df_analysis['rmse_mae_ratio'] = df_analysis['rmse'] / (df_analysis['mae'] + 1e-10)
-    df_analysis['outlier_sensitivity'] = (df_analysis['rmse_mae_ratio'] - 1) * 100
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        # RMSE vs MAE Scatter
-        fig_scatter = px.scatter(
-            df_analysis,
-            x='mae', 
-            y='rmse',
-            color='model_name',
-            hover_data=['r2', 'mape'],
-            title='RMSE vs MAE (Closer to diagonal = Less Outlier Sensitivity)',
-            labels={'mae': 'MAE', 'rmse': 'RMSE', 'model_name': 'Model'}
-        )
-        max_val = max(df_analysis['rmse'].max(), df_analysis['mae'].max())
-        fig_scatter.add_shape(
-            type='line', x0=0, y0=0, x1=max_val, y1=max_val,
-            line=dict(color='gray', dash='dash'), name='Ideal (No Outliers)'
-        )
-        fig_scatter.update_layout(height=400, showlegend=False)
-        st.plotly_chart(fig_scatter, use_container_width=True)
-        
-    with col2:
-        # Outlier Sensitivity Bar
-        fig_outlier = px.bar(
-            df_analysis.sort_values('outlier_sensitivity'),
-            x='outlier_sensitivity',
-            y='model_name',
-            orientation='h',
-            title='Outlier Sensitivity Score (Lower = Better)',
-            labels={'outlier_sensitivity': 'Sensitivity %', 'model_name': 'Model'},
-            color='outlier_sensitivity',
-            color_continuous_scale='RdYlGn_r'
-        )
-        fig_outlier.update_layout(height=400, showlegend=False)
-        st.plotly_chart(fig_outlier, use_container_width=True)
-        
-    # Issue Detection
-    st.subheader("⚠️ Potential Issues Detected")
-    issues_found = False
-    
-    # High Sensitivity
-    high_sensitivity = df_analysis[df_analysis['outlier_sensitivity'] > 20]
-    if not high_sensitivity.empty:
-        issues_found = True
-        with st.expander("🎯 High Outlier Sensitivity Detected", expanded=True):
-            st.warning(f"**{len(high_sensitivity)} model(s)** show high sensitivity to outliers:")
-            for _, row in high_sensitivity.iterrows():
-                st.write(f"- **{row['model_name']}**: {row['outlier_sensitivity']:.1f}% above ideal")
-            st.info("💡 **Suggestion**: Consider removing outliers from your data or use robust models like Ridge/Lasso regression.")
-                
-    # Negative R2
-    negative_r2 = df_analysis[df_analysis['r2'] < 0]
-    if not negative_r2.empty:
-        issues_found = True
-        with st.expander("❌ Poor Model Fit (Negative R²)", expanded=True):
-            st.error(f"**{len(negative_r2)} model(s)** have negative R² (worse than mean baseline):")
-            for _, row in negative_r2.iterrows():
-                st.write(f"- **{row['model_name']}**: R² = {row['r2']:.4f}")
-            st.info("💡 **Suggestion**: These models are not suitable for this dataset. Check for data quality issues or feature engineering needs.")
-
-    # Check for high MAPE
-    if 'mape' in df_analysis.columns:
-        try:
-            df_analysis['mape_val'] = df_analysis['mape'].apply(
-                lambda x: float(str(x).replace('%', '')) if x else 0
-            )
-            high_mape = df_analysis[df_analysis['mape_val'] > 50]
-            if not high_mape.empty:
-                issues_found = True
-                with st.expander("📊 High Percentage Error", expanded=False):
-                    st.warning(f"**{len(high_mape)} model(s)** have MAPE > 50%:")
-                    for _, row in high_mape.iterrows():
-                        st.write(f"- **{row['model_name']}**: MAPE = {row['mape']}")
-                    st.info("💡 **Suggestion**: The target variable may have small values near zero, causing inflated percentage errors. Consider log transformation.")
-        except:
-            pass
-
-    if not issues_found:
-        st.success("✅ No major issues detected! All models show reasonable error patterns.")
-
-    st.divider()
-    
-    # Download results
+    # Download
     csv = df_success.to_csv(index=False)
     st.download_button(
         label="📥 Download Results as CSV",
@@ -537,6 +645,7 @@ def show_history_page():
             "Job ID": jid,
             "Date": data.get('created_at'),
             "Status": data.get('status'),
+            "Type": data.get('learning_type', 'regression').capitalize(),
             "Target": data.get('target_column'),
             "File": data.get('filename')
         })

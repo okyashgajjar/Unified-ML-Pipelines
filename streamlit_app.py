@@ -77,12 +77,13 @@ def check_api_health() -> bool:
     except:
         return False
 
-def upload_and_train(file, target_column: str, use_parallel: bool, enable_mlflow: bool) -> Optional[dict]:
+def upload_and_train(file, target_column: str, learning_type: str, use_parallel: bool, enable_mlflow: bool) -> Optional[dict]:
     """Upload file and trigger training"""
     try:
         files = {"file": (file.name, file.getvalue(), "text/csv")}
         data = {
             "target_column": target_column,
+            "learning_type": learning_type.lower(),
             "use_parallel": use_parallel,
             "enable_mlflow": enable_mlflow
         }
@@ -149,7 +150,7 @@ def main():
 
 def show_home_page():
     """Home page with project overview"""
-    st.header("Welcome to Unified ML Pipelines v1.1")
+    st.header("Welcome to Unified ML Pipelines v2.0")
     
     col1, col2 = st.columns(2)
     
@@ -160,6 +161,7 @@ def show_home_page():
         mathematically correct preprocessing pipelines.
         
         **Key Features:**
+        - ✅ **Regression & Classification** support
         - ✅ Parallel execution (2x faster)
         - ✅ Error handling at all levels
         - ✅ MLFlow experiment tracking
@@ -170,12 +172,18 @@ def show_home_page():
     with col2:
         st.subheader("🎯 Model Families")
         st.markdown("""
-        1. **Weight-Based** (Linear, Ridge, Lasso)
-        2. **Tree-Based** (DT, RF, XGBoost, GBM)
-        3. **Neural Networks** (MLP Regressor)
-        4. **Instance-Based** (KNN, Radius Neighbors)
+        **Regression Models:**
+        - Weight-Based (Linear, Ridge, Lasso)
+        - Tree-Based (DT, RF, XGBoost, GBM)
+        - Neural Networks (MLP Regressor)
+        - Instance-Based (KNN)
         
-        Each family uses preprocessing optimized for its mathematical learning behavior.
+        **Classification Models:**
+        - Weight-Based (Logistic, Ridge)
+        - Tree-Based (DT, RF, GBM, LightGBM)
+        - Neural Networks (MLP Classifier)
+        - Kernel-Based (SVC)
+        - Instance-Based (KNN)
         """)
     
     st.divider()
@@ -184,7 +192,7 @@ def show_home_page():
     st.markdown("""
     1. Navigate to **📊 Train Models**
     2. Upload your CSV dataset
-    3. Select target column
+    3. Select target column & **learning type** (Regression/Classification)
     4. Click **Start Training**
     5. View results in **📈 View Results**
     """)
@@ -217,7 +225,7 @@ def show_train_page():
             # Configuration
             st.subheader("⚙️ Training Configuration")
             
-            col1, col2 = st.columns(2)
+            col1, col2, col3 = st.columns(3)
             
             with col1:
                 target_column = st.selectbox(
@@ -227,18 +235,25 @@ def show_train_page():
                 )
             
             with col2:
+                learning_type = st.selectbox(
+                    "Learning Type",
+                    options=["Regression", "Classification"],
+                    help="Choose Regression for continuous targets, Classification for categorical"
+                )
+            
+            with col3:
                 use_parallel = st.checkbox("Use Parallel Execution", value=True, help="Train model families in parallel (faster)")
             
             enable_mlflow = st.checkbox("Enable MLFlow Tracking", value=True, help="Log experiments to MLFlow")
             
             # Train button
             if st.button("🚀 Start Training", type="primary", use_container_width=True):
-                with st.spinner("Uploading dataset and starting training..."):
-                    result = upload_and_train(uploaded_file, target_column, use_parallel, enable_mlflow)
+                with st.spinner(f"Uploading dataset and starting {learning_type.lower()} training..."):
+                    result = upload_and_train(uploaded_file, target_column, learning_type, use_parallel, enable_mlflow)
                     
                     if result:
                         st.session_state['current_job_id'] = result['job_id']
-                        st.markdown(f'<div class="success-box">✅ Training started successfully!<br>Job ID: <code>{result["job_id"]}</code></div>', unsafe_allow_html=True)
+                        st.markdown(f'<div class="success-box">✅ {learning_type} training started successfully!<br>Job ID: <code>{result["job_id"]}</code></div>', unsafe_allow_html=True)
                         
                         # Auto-navigate to results
                         st.info("💡 Navigate to **📈 View Results** to monitor progress")
@@ -321,8 +336,170 @@ def display_training_results(results: list):
         st.dataframe(df_results)
         return
     
+    # Detect result type based on available columns
+    is_classification = 'accuracy' in df_success.columns and 'mae' not in df_success.columns
+    
     # Metrics overview
     st.subheader("📊 Model Performance Overview")
+    
+    if is_classification:
+        # Classification Results Display
+        display_classification_results(df_success)
+    else:
+        # Regression Results Display
+        display_regression_results(df_success)
+
+def display_classification_results(df_success: pd.DataFrame):
+    """Display classification training results with visualizations"""
+    
+    # Top 3 models by Accuracy
+    st.markdown("### 🏆 Top 3 Models (by Accuracy)")
+    top_3 = df_success.nlargest(3, 'accuracy')
+    
+    cols = st.columns(3)
+    for idx, (_, row) in enumerate(top_3.iterrows()):
+        with cols[idx]:
+            acc_val = row['accuracy'] if row['accuracy'] is not None else 0
+            prec_val = row['precision'] if row['precision'] is not None else 0
+            st.markdown(f"""
+            <div class="metric-card">
+                <h4>#{idx+1} {row['model_name']}</h4>
+                <p><b>Accuracy:</b> {acc_val:.4f}</p>
+                <p><b>Precision:</b> {prec_val:.4f}</p>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    st.divider()
+    
+    # Visualizations
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Accuracy comparison
+        fig_acc = px.bar(
+            df_success.sort_values('accuracy', ascending=True),
+            x='accuracy',
+            y='model_name',
+            orientation='h',
+            title='Accuracy - Higher is Better',
+            labels={'accuracy': 'Accuracy', 'model_name': 'Model'},
+            color='accuracy',
+            color_continuous_scale='RdYlGn'
+        )
+        fig_acc.update_layout(showlegend=False, height=400)
+        st.plotly_chart(fig_acc, use_container_width=True)
+    
+    with col2:
+        # Precision comparison
+        fig_prec = px.bar(
+            df_success.sort_values('precision', ascending=True),
+            x='precision',
+            y='model_name',
+            orientation='h',
+            title='Precision - Higher is Better',
+            labels={'precision': 'Precision', 'model_name': 'Model'},
+            color='precision',
+            color_continuous_scale='RdYlGn'
+        )
+        fig_prec.update_layout(showlegend=False, height=400)
+        st.plotly_chart(fig_prec, use_container_width=True)
+    
+    # Metrics comparison radar chart
+    st.subheader("📈 Multi-Metric Comparison")
+    
+    # Create radar chart for top 5 models
+    top_5 = df_success.nlargest(5, 'accuracy')
+    
+    fig_radar = go.Figure()
+    
+    for _, row in top_5.iterrows():
+        acc_val = row['accuracy'] if row['accuracy'] is not None else 0
+        prec_val = row['precision'] if row['precision'] is not None else 0
+        fig_radar.add_trace(go.Scatterpolar(
+            r=[acc_val, prec_val],
+            theta=['Accuracy', 'Precision'],
+            fill='toself',
+            name=row['model_name']
+        ))
+    
+    fig_radar.update_layout(
+        polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
+        showlegend=True,
+        title="Top 5 Models - Classification Metrics",
+        height=500
+    )
+    
+    st.plotly_chart(fig_radar, use_container_width=True)
+    
+    # Detailed results table with hyperparameters
+    st.subheader("📋 Detailed Results")
+    
+    # Format display columns - include best_params
+    display_cols = ['model_name', 'accuracy', 'precision', 'best_params']
+    available_cols = [c for c in display_cols if c in df_success.columns]
+    display_df = df_success[available_cols].copy()
+    display_df = display_df.sort_values('accuracy', ascending=False)
+    
+    # Format hyperparameters as readable string
+    if 'best_params' in display_df.columns:
+        display_df['best_params'] = display_df['best_params'].apply(
+            lambda x: str(x).replace('model__', '') if x else 'N/A'
+        )
+    
+    st.dataframe(
+        display_df.style.format({
+            'accuracy': '{:.4f}',
+            'precision': '{:.4f}'
+        }),
+        use_container_width=True,
+        height=400
+    )
+    
+    st.divider()
+    
+    # Issue Highlights for Classification
+    st.subheader("⚠️ Potential Issues Detected")
+    
+    issues_found = False
+    
+    # Check for low accuracy
+    low_accuracy = df_success[df_success['accuracy'] < 0.6]
+    if not low_accuracy.empty:
+        issues_found = True
+        with st.expander("⚠️ Low Accuracy Models Detected", expanded=True):
+            st.warning(f"**{len(low_accuracy)} model(s)** have accuracy below 60%:")
+            for _, row in low_accuracy.iterrows():
+                st.write(f"- **{row['model_name']}**: Accuracy = {row['accuracy']:.4f}")
+            st.info("💡 **Suggestion**: Consider feature engineering, data balancing, or trying different model families.")
+    
+    # Check for precision-accuracy gap (potential class imbalance)
+    df_check = df_success.copy()
+    df_check['prec_acc_gap'] = abs(df_check['accuracy'] - df_check['precision'])
+    high_gap = df_check[df_check['prec_acc_gap'] > 0.1]
+    if not high_gap.empty:
+        issues_found = True
+        with st.expander("📊 Accuracy-Precision Gap Detected", expanded=False):
+            st.warning(f"**{len(high_gap)} model(s)** show significant gap between accuracy and precision:")
+            for _, row in high_gap.iterrows():
+                st.write(f"- **{row['model_name']}**: Gap = {row['prec_acc_gap']:.4f}")
+            st.info("💡 **Suggestion**: This may indicate class imbalance. Consider using SMOTE or class weights.")
+    
+    if not issues_found:
+        st.success("✅ No major issues detected! All models show reasonable classification performance.")
+    
+    st.divider()
+    
+    # Download results
+    csv = df_success.to_csv(index=False)
+    st.download_button(
+        label="📥 Download Results as CSV",
+        data=csv,
+        file_name="classification_results.csv",
+        mime="text/csv"
+    )
+
+def display_regression_results(df_success: pd.DataFrame):
+    """Display regression training results with visualizations"""
     
     # Top 3 models by MAE
     st.markdown("### 🏆 Top 3 Models (by MAE)")
@@ -562,11 +739,13 @@ def show_history_page():
         
         # Display jobs
         for job in jobs:
-            with st.expander(f"Job: {job['job_id'][:8]}... - {job['status'].upper()}"):
+            learning_type = job.get('learning_type', 'regression').capitalize()
+            with st.expander(f"Job: {job['job_id'][:8]}... - {job['status'].upper()} ({learning_type})"):
                 col1, col2 = st.columns(2)
                 
                 with col1:
                     st.write(f"**Status:** {job['status']}")
+                    st.write(f"**Learning Type:** {learning_type}")
                     st.write(f"**Target Column:** {job.get('target_column', 'N/A')}")
                     st.write(f"**Filename:** {job.get('filename', 'N/A')}")
                 

@@ -16,11 +16,18 @@ from Superwised_Regression.tabular_data.parallel_executor import execute_model_f
 from Superwised_Regression.tabular_data.mlflow_tracker import MLFlowTracker
 from Superwised_Regression.preprocessing import datacleaning
 
+# Classification imports
+from Superwised_Classification.tabular_data.weight_class import weight_based as weight_based_classifier
+from Superwised_Classification.tabular_data.tree_class import tree_based as tree_based_classifier
+from Superwised_Classification.tabular_data.nn_class import neural_network as nn_classifier
+from Superwised_Classification.tabular_data.kernel_class import kernel_based as kernel_based_classifier
+from Superwised_Classification.tabular_data.instance_class import instance_based as instance_based_classifier
+
 # Initialize FastAPI app
 app = FastAPI(
     title="ML Pipelines API",
-    description="Mathematics-Driven Parallel ML Pipelines for Regression",
-    version="1.1.0"
+    description="Mathematics-Driven Parallel ML Pipelines for Regression & Classification",
+    version="2.0.0"
 )
 
 # Add CORS middleware for Streamlit integration
@@ -38,6 +45,7 @@ training_jobs: Dict[str, Dict[str, Any]] = {}
 # Pydantic models for request/response validation
 class TrainRequest(BaseModel):
     target_column: str
+    learning_type: str = "regression"  # "regression" or "classification"
     use_parallel: bool = True
     enable_mlflow: bool = True
 
@@ -120,6 +128,87 @@ def train_models_background(job_id: str, df: pd.DataFrame, target: str, use_para
         training_jobs[job_id]['error_details'] = error_details
         training_jobs[job_id]['completed_at'] = datetime.now().isoformat()
 
+# Background task for classification model training
+def train_classification_background(job_id: str, df: pd.DataFrame, target: str, enable_mlflow: bool):
+    """
+    Background task to train classification models and update job status.
+    """
+    try:
+        training_jobs[job_id]['status'] = 'running'
+        training_jobs[job_id]['started_at'] = datetime.now().isoformat()
+        
+        print(f"[Job {job_id}] Starting classification training...")
+        print(f"[Job {job_id}] Dataset shape: {df.shape}")
+        print(f"[Job {job_id}] Target column: '{target}'")
+        print(f"[Job {job_id}] Columns: {list(df.columns)}")
+        
+        # Define classification model families
+        model_functions = [
+            ('Weight-Based Classifiers', weight_based_classifier),
+            ('Tree-Based Classifiers', tree_based_classifier),
+            ('Neural Network Classifiers', nn_classifier),
+            ('Kernel-Based Classifiers', kernel_based_classifier),
+            ('Instance-Based Classifiers', instance_based_classifier)
+        ]
+        
+        # Execute each model family and collect results
+        all_results = []
+        for family_name, func in model_functions:
+            print(f"[Job {job_id}] Training {family_name}...")
+            try:
+                family_results = func(df, target)
+                all_results.append(family_results)
+                print(f"[Job {job_id}] {family_name} completed.")
+            except Exception as family_error:
+                print(f"[Job {job_id}] {family_name} failed: {str(family_error)}")
+                all_results.append(pd.DataFrame([{
+                    'model_name': family_name,
+                    'best_params': None,
+                    'pipeline': None,
+                    'accuracy': None,
+                    'precision': None,
+                    'status': 'failed',
+                    'error': str(family_error)
+                }]))
+        
+        # Combine all results
+        results_df = pd.concat(all_results, ignore_index=True)
+        
+        # Sort by accuracy (descending) - higher is better
+        results_df = results_df.sort_values(by='accuracy', ascending=False, na_position='last')
+        
+        # Log to MLFlow if enabled
+        if enable_mlflow:
+            try:
+                tracker = MLFlowTracker(experiment_name=f"Classification_Job_{job_id}")
+                for family_name, func in model_functions:
+                    family_results = results_df[results_df['model_name'].str.contains(family_name.split()[0], case=False, na=False)]
+                    if not family_results.empty:
+                        tracker.log_family_results(family_results, family_name)
+            except Exception as mlflow_error:
+                print(f"MLFlow logging failed: {str(mlflow_error)}")
+        
+        # Convert results to dict (excluding pipeline objects)
+        results_dict = results_df.drop(columns=['pipeline'], errors='ignore').to_dict(orient='records')
+        
+        # Update job status
+        training_jobs[job_id]['status'] = 'completed'
+        training_jobs[job_id]['results'] = results_dict
+        training_jobs[job_id]['completed_at'] = datetime.now().isoformat()
+        
+        print(f"[Job {job_id}] Classification training completed successfully!")
+        
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"[Job {job_id}] Classification training failed with error:")
+        print(error_details)
+        
+        training_jobs[job_id]['status'] = 'failed'
+        training_jobs[job_id]['error'] = str(e)
+        training_jobs[job_id]['error_details'] = error_details
+        training_jobs[job_id]['completed_at'] = datetime.now().isoformat()
+
 # API Endpoints
 
 @app.get("/", response_model=HealthResponse)
@@ -127,7 +216,7 @@ async def root():
     """Root endpoint - health check"""
     return HealthResponse(
         status="healthy",
-        version="1.1.0",
+        version="2.0.0",
         timestamp=datetime.now().isoformat()
     )
 
@@ -136,7 +225,7 @@ async def health_check():
     """Health check endpoint"""
     return HealthResponse(
         status="healthy",
-        version="1.1.0",
+        version="2.0.0",
         timestamp=datetime.now().isoformat()
     )
 
@@ -145,6 +234,7 @@ async def train_models(
     background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     target_column: str = Form(...),  # Required - user selects from their data
+    learning_type: str = Form("regression"),  # "regression" or "classification"
     use_parallel: str = Form("true"),
     enable_mlflow: str = Form("true")
 ):
@@ -154,6 +244,7 @@ async def train_models(
     Args:
         file: CSV file upload
         target_column: Name of the target column
+        learning_type: Type of learning - "regression" or "classification"
         use_parallel: Whether to use parallel execution (default: True)
         enable_mlflow: Whether to log to MLFlow (default: True)
     
@@ -164,6 +255,7 @@ async def train_models(
     # Convert string form data to boolean
     use_parallel_bool = use_parallel.lower() == "true" if isinstance(use_parallel, str) else use_parallel
     enable_mlflow_bool = enable_mlflow.lower() == "true" if isinstance(enable_mlflow, str) else enable_mlflow
+    learning_type_str = learning_type.lower() if isinstance(learning_type, str) else "regression"
     
     # Validate file type
     if not file.filename.endswith('.csv'):
@@ -197,20 +289,30 @@ async def train_models(
             'status': 'queued',
             'created_at': datetime.now().isoformat(),
             'target_column': target_column,
+            'learning_type': learning_type_str,
             'use_parallel': use_parallel_bool,
             'enable_mlflow': enable_mlflow_bool,
             'filename': file.filename
         }
         
-        # Start background training
-        background_tasks.add_task(
-            train_models_background,
-            job_id,
-            df,
-            target_column,
-            use_parallel_bool,
-            enable_mlflow_bool
-        )
+        # Start background training based on learning type
+        if learning_type_str == "classification":
+            background_tasks.add_task(
+                train_classification_background,
+                job_id,
+                df,
+                target_column,
+                enable_mlflow_bool
+            )
+        else:
+            background_tasks.add_task(
+                train_models_background,
+                job_id,
+                df,
+                target_column,
+                use_parallel_bool,
+                enable_mlflow_bool
+            )
         
         # Clean up temp file
         os.remove(temp_file_path)
@@ -267,6 +369,7 @@ async def list_jobs():
             'status': job_data['status'],
             'created_at': job_data.get('created_at'),
             'target_column': job_data.get('target_column'),
+            'learning_type': job_data.get('learning_type', 'regression'),
             'filename': job_data.get('filename')
         })
     
