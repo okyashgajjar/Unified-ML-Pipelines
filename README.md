@@ -123,24 +123,24 @@ Unified-ML-Pipelines/
 
 ## 🎯 Regression Model Families
 
-| Family | Models | Preprocessing | Hyperparameter Search |
-|--------|--------|---------------|----------------------|
-| **Weight-Based** | Linear, Ridge, Lasso | StandardScaler + OneHotEncoder | GridSearchCV |
-| **Tree-Based** | DT, RF, XGBoost, GBM | No scaling + OrdinalEncoder | RandomizedSearchCV |
-| **Neural Network** | MLP Regressor | StandardScaler + OneHotEncoder | RandomizedSearchCV |
-| **Instance-Based** | KNN, Radius Neighbors | StandardScaler (numeric only) | GridSearchCV |
+| Family | Models |
+|--------|--------|
+| **Weight-Based** | Linear, Ridge, Lasso |
+| **Tree-Based** | DT, RF, XGBoost, GBM |
+| **Neural Network** | MLP Regressor |
+| **Instance-Based** | KNN, Radius Neighbors |
 
 ---
 
 ## 🎯 Classification Model Families
 
-| Family | Models | Preprocessing | Hyperparameter Search |
-|--------|--------|---------------|----------------------|
-| **Weight-Based** | Logistic Regression, Ridge Classifier | StandardScaler + OneHotEncoder + PCA | GridSearchCV |
-| **Tree-Based** | DT, RF, GBM, AdaBoost, LightGBM, XGBoost | OrdinalEncoder (no scaling) | RandomizedSearchCV |
-| **Neural Network** | MLP Classifier | StandardScaler + OneHotEncoder + PCA | RandomizedSearchCV |
-| **Kernel-Based** | SVC (RBF, Linear, Poly) | StandardScaler + OneHotEncoder + PCA | RandomizedSearchCV |
-| **Instance-Based** | KNN Classifier | StandardScaler (numeric only) | GridSearchCV |
+| Family | Models |
+|--------|--------|
+| **Weight-Based** | Logistic Regression, Ridge Classifier |
+| **Tree-Based** | DT, RF, GBM, AdaBoost, LightGBM, XGBoost |
+| **Neural Network** | MLP Classifier |
+| **Kernel-Based** | SVC (RBF, Linear, Poly) |
+| **Instance-Based** | KNN Classifier |
 
 ---
 
