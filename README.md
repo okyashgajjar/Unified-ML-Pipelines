@@ -233,4 +233,4 @@ MIT License - feel free to use and modify.
 
 Built with ❤️ focusing on **mathematical correctness** and **educational value**.
 
-*Version 1.2 | Last Updated: January 2026*
+*Version 2.0 | Last Updated: January 2026*
