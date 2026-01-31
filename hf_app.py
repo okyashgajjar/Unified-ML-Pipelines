@@ -177,9 +177,12 @@ def run_classification_pipeline(df: pd.DataFrame, target_column: str, enable_mlf
         all_results = []
         for family_name, func in model_functions:
             try:
+                print(f"Running {family_name}...")
                 family_results = func(df, target_column)
                 all_results.append(family_results)
+                print(f"✓ {family_name} completed successfully")
             except Exception as family_error:
+                print(f"✗ {family_name} failed: {str(family_error)}")
                 all_results.append(pd.DataFrame([{
                     'model_name': family_name,
                     'best_params': None,
@@ -191,10 +194,16 @@ def run_classification_pipeline(df: pd.DataFrame, target_column: str, enable_mlf
                 }]))
         
         # Combine all results
+        if not all_results:
+            print("Warning: No results collected from any model family")
+            return False, "No model families could be executed"
+        
         results_df = pd.concat(all_results, ignore_index=True)
+        print(f"Classification results collected: {len(results_df)} models")
         
         # Sort by accuracy (descending) - higher is better
-        results_df = results_df.sort_values(by='accuracy', ascending=False, na_position='last')
+        if 'accuracy' in results_df.columns:
+            results_df = results_df.sort_values(by='accuracy', ascending=False, na_position='last')
         
         # MLFlow Logging (Optional)
         if enable_mlflow:
@@ -266,22 +275,22 @@ def show_home_page():
         - ✅ Automatic Preprocessing
         - ✅ Interactive Visualizations
         """)
-    with col2:
-        st.subheader("🎯 Model Families")
-        st.markdown("""
-        **Regression Models:**
-        - Weight-Based (Linear, Ridge, Lasso)
-        - Tree-Based (RF, XGBoost, GBM)
-        - Neural Networks (MLP)
-        - Instance-Based (KNN)
+    # with col2:
+    #     st.subheader("🎯 Model Families")
+    #     st.markdown("""
+    #     **Regression Models:**
+    #     - Weight-Based (Linear, Ridge, Lasso)
+    #     - Tree-Based (RF, XGBoost, GBM)
+    #     - Neural Networks (MLP)
+    #     - Instance-Based (KNN)
         
-        **Classification Models:**
-        - Weight-Based (Logistic, Ridge)
-        - Tree-Based (DT, RF, GBM, LightGBM)
-        - Neural Networks (MLP)
-        - Kernel-Based (SVC)
-        - Instance-Based (KNN)
-        """)
+    #     **Classification Models:**
+    #     - Weight-Based (Logistic, Ridge)
+    #     - Tree-Based (DT, RF, GBM, LightGBM)
+    #     - Neural Networks (MLP)
+    #     - Kernel-Based (SVC)
+    #     - Instance-Based (KNN)
+    #     """)
 
 def show_train_page():
     st.header("📊 Train Models")
@@ -333,35 +342,45 @@ def show_train_page():
                     f.write(uploaded_file.getvalue())
                 
                 # Run Training (Synchronous with Spinner)
-                with st.spinner(f"🔄 Preprocessing data and training {learning_type.lower()} models... This may take a minute..."):
-                    try:
-                        # Clean Data
-                        df_clean = datacleaning(temp_path)
+                progress_placeholder = st.empty()
+                progress_placeholder.info(f"🔄 Preprocessing data for {learning_type.lower()} training...")
+                
+                try:
+                    # Clean Data
+                    df_clean = datacleaning(temp_path)
+                    progress_placeholder.info(f"✓ Data cleaned. Shape: {df_clean.shape}. Starting {learning_type.lower()} training...")
+                    
+                    # Train based on learning type
+                    if learning_type.lower() == "classification":
+                        progress_placeholder.info(f"🔄 Training classification models on target '{target_column}'...")
+                        success, message = run_classification_pipeline(
+                            df_clean, target_column, enable_mlflow, job_id
+                        )
+                    else:
+                        progress_placeholder.info(f"🔄 Training regression models on target '{target_column}'...")
+                        success, message = run_training_pipeline(
+                            df_clean, target_column, use_parallel, enable_mlflow, job_id
+                        )
+                    
+                    if success:
+                        progress_placeholder.empty()  # Clear the progress message
+                        st.balloons()
+                        st.success(f"✅ {learning_type} Training Completed!")
+                        time.sleep(1)
+                        st.info("Navigate to **📈 View Results** to see the analysis.")
+                    else:
+                        progress_placeholder.empty()
+                        st.error(f"❌ Training Failed: {message}")
                         
-                        # Train based on learning type
-                        if learning_type.lower() == "classification":
-                            success, message = run_classification_pipeline(
-                                df_clean, target_column, enable_mlflow, job_id
-                            )
-                        else:
-                            success, message = run_training_pipeline(
-                                df_clean, target_column, use_parallel, enable_mlflow, job_id
-                            )
-                        
-                        if success:
-                            st.balloons()
-                            st.success(f"✅ {learning_type} Training Completed!")
-                            time.sleep(1)
-                            st.info("Navigate to **📈 View Results** to see the analysis.")
-                        else:
-                            st.error(f"❌ Training Failed: {message}")
-                            
-                    except Exception as e:
-                        st.error(f"Error during execution: {e}")
-                    finally:
-                        # Cleanup
-                        if os.path.exists(temp_path):
-                            os.remove(temp_path)
+                except Exception as e:
+                    import traceback
+                    progress_placeholder.empty()
+                    st.error(f"Error during execution: {e}")
+                    st.code(traceback.format_exc(), language='python')
+                finally:
+                    # Cleanup
+                    if os.path.exists(temp_path):
+                        os.remove(temp_path)
                             
         except Exception as e:
             st.error(f"Error reading file: {e}")
@@ -419,7 +438,7 @@ def display_training_results(results: list):
         display_regression_results(df_success)
 
 def display_classification_results(df_success: pd.DataFrame):
-    """Display classification results with accuracy/precision metrics"""
+    """Display classification results with accuracy/precision metrics and enhanced visualizations"""
     # Metrics
     st.subheader("🏆 Top Performing Models (by Accuracy)")
     top_3 = df_success.nlargest(3, 'accuracy')
@@ -439,7 +458,8 @@ def display_classification_results(df_success: pd.DataFrame):
             
     st.divider()
     
-    # Charts
+    # Charts - Accuracy and Precision bars
+    st.subheader("📊 Model Performance Comparison")
     col1, col2 = st.columns(2)
     with col1:
         fig_acc = px.bar(
@@ -468,17 +488,132 @@ def display_classification_results(df_success: pd.DataFrame):
         fig_prec.update_layout(showlegend=False, height=400)
         st.plotly_chart(fig_prec, use_container_width=True)
 
+    st.divider()
+
+    # NEW: Accuracy vs Precision Scatter Plot
+    st.subheader("🎯 Accuracy vs Precision Analysis")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Scatter plot showing accuracy vs precision trade-off
+        fig_scatter = px.scatter(
+            df_success,
+            x='accuracy',
+            y='precision',
+            text='model_name',
+            title='Accuracy vs Precision Trade-off',
+            labels={'accuracy': 'Accuracy', 'precision': 'Precision'},
+            color='accuracy',
+            size='precision',
+            color_continuous_scale='Viridis'
+        )
+        fig_scatter.update_traces(textposition='top center', textfont_size=9)
+        fig_scatter.update_layout(height=450, showlegend=False)
+        # Add diagonal reference line (ideal: accuracy = precision)
+        fig_scatter.add_shape(
+            type='line', x0=0, y0=0, x1=1, y1=1,
+            line=dict(color='gray', dash='dash', width=1)
+        )
+        fig_scatter.add_annotation(
+            x=0.85, y=0.75, text="Ideal Line", showarrow=False,
+            font=dict(size=10, color='gray')
+        )
+        st.plotly_chart(fig_scatter, use_container_width=True)
+    
+    with col2:
+        # Accuracy-Precision Gap Analysis
+        df_gap = df_success.copy()
+        df_gap['gap'] = abs(df_gap['accuracy'] - df_gap['precision'])
+        df_gap = df_gap.sort_values('gap', ascending=True)
+        
+        fig_gap = px.bar(
+            df_gap,
+            x='gap',
+            y='model_name',
+            orientation='h',
+            title='Accuracy-Precision Gap (Lower = More Balanced)',
+            labels={'gap': 'Gap', 'model_name': 'Model'},
+            color='gap',
+            color_continuous_scale='RdYlGn_r'
+        )
+        fig_gap.update_layout(showlegend=False, height=450)
+        st.plotly_chart(fig_gap, use_container_width=True)
+    
+    st.divider()
+
+    # NEW: Model Family Performance Comparison
+    st.subheader("👨‍👩‍👧‍👦 Model Family Performance")
+    
+    # Extract model family from model name
+    df_family = df_success.copy()
+    def get_family(name):
+        name_lower = name.lower()
+        if 'logistic' in name_lower or 'ridge' in name_lower:
+            return 'Weight-Based'
+        elif any(x in name_lower for x in ['tree', 'forest', 'gradient', 'ada', 'lgbm', 'lightgbm', 'xgb']):
+            return 'Tree-Based'
+        elif 'mlp' in name_lower or 'neural' in name_lower:
+            return 'Neural Network'
+        elif 'svc' in name_lower or 'svm' in name_lower:
+            return 'Kernel-Based'
+        elif 'knn' in name_lower or 'neighbor' in name_lower:
+            return 'Instance-Based'
+        else:
+            return 'Other'
+    
+    df_family['family'] = df_family['model_name'].apply(get_family)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Grouped bar chart by family
+        family_stats = df_family.groupby('family').agg({
+            'accuracy': 'mean',
+            'precision': 'mean'
+        }).reset_index()
+        
+        fig_family = go.Figure(data=[
+            go.Bar(name='Accuracy', x=family_stats['family'], y=family_stats['accuracy'], marker_color='#2ecc71'),
+            go.Bar(name='Precision', x=family_stats['family'], y=family_stats['precision'], marker_color='#3498db')
+        ])
+        fig_family.update_layout(
+            barmode='group',
+            title='Average Performance by Model Family',
+            xaxis_title='Model Family',
+            yaxis_title='Score',
+            height=400,
+            yaxis=dict(range=[0, 1])
+        )
+        st.plotly_chart(fig_family, use_container_width=True)
+    
+    with col2:
+        # Box plot showing performance distribution by family
+        fig_box = px.box(
+            df_family,
+            x='family',
+            y='accuracy',
+            color='family',
+            title='Accuracy Distribution by Model Family',
+            labels={'family': 'Model Family', 'accuracy': 'Accuracy'}
+        )
+        fig_box.update_layout(height=400, showlegend=False)
+        st.plotly_chart(fig_box, use_container_width=True)
+
+    st.divider()
+
     # Radar chart
-    st.subheader("📈 Multi-Metric Comparison")
+    st.subheader("📈 Multi-Metric Comparison (Top 5)")
     top_5 = df_success.nlargest(5, 'accuracy')
     
     fig_radar = go.Figure()
     for _, row in top_5.iterrows():
         acc_val = row['accuracy'] if row['accuracy'] is not None else 0
         prec_val = row['precision'] if row['precision'] is not None else 0
+        # Add F1 approximation for richer radar
+        f1_approx = 2 * (acc_val * prec_val) / (acc_val + prec_val + 1e-10)
         fig_radar.add_trace(go.Scatterpolar(
-            r=[acc_val, prec_val],
-            theta=['Accuracy', 'Precision'],
+            r=[acc_val, prec_val, f1_approx],
+            theta=['Accuracy', 'Precision', 'F1 (approx)'],
             fill='toself',
             name=row['model_name']
         ))
@@ -486,12 +621,37 @@ def display_classification_results(df_success: pd.DataFrame):
     fig_radar.update_layout(
         polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
         showlegend=True,
-        title="Top 5 Models - Classification Metrics",
+        title="Top 5 Models - Classification Metrics Radar",
         height=500
     )
     st.plotly_chart(fig_radar, use_container_width=True)
 
-    # Detailed results
+    st.divider()
+
+    # NEW: Performance Heatmap
+    st.subheader("🔥 Performance Heatmap")
+    
+    # Create heatmap data
+    heatmap_df = df_success[['model_name', 'accuracy', 'precision']].copy()
+    heatmap_df['f1_approx'] = 2 * (heatmap_df['accuracy'] * heatmap_df['precision']) / (heatmap_df['accuracy'] + heatmap_df['precision'] + 1e-10)
+    heatmap_df = heatmap_df.set_index('model_name')
+    heatmap_df.columns = ['Accuracy', 'Precision', 'F1 (approx)']
+    
+    fig_heatmap = px.imshow(
+        heatmap_df.values,
+        x=heatmap_df.columns.tolist(),
+        y=heatmap_df.index.tolist(),
+        color_continuous_scale='RdYlGn',
+        aspect='auto',
+        title='Model Performance Heatmap',
+        labels=dict(x='Metric', y='Model', color='Score')
+    )
+    fig_heatmap.update_layout(height=max(300, len(df_success) * 35))
+    st.plotly_chart(fig_heatmap, use_container_width=True)
+
+    st.divider()
+
+    # Detailed results table
     st.subheader("📋 Detailed Results")
     display_cols = ['model_name', 'accuracy', 'precision', 'best_params']
     available_cols = [c for c in display_cols if c in df_success.columns]
