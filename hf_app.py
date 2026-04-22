@@ -357,7 +357,7 @@ def run_nlp_pipeline(df: pd.DataFrame, target_column: str, enable_mlflow: bool, 
 
 def main():
     # Header
-    st.markdown('<div class="main-header">STITCH ML</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">Unified ML Pipelines</div>', unsafe_allow_html=True)
     st.markdown('<div class="sub-header">Advanced Parallel Neural Engine • v3.0</div>', unsafe_allow_html=True)
     
     # Sidebar
@@ -386,7 +386,7 @@ def show_home_page():
         <div style="background: rgba(255,255,255,0.03); padding: 2rem; border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05);">
             <h3 style="color: #00f2fe; margin-top: 0;">🚀 Project Genesis</h3>
             <p style="color: #a0a0a0; font-size: 1.1rem; line-height: 1.6;">
-                STITCH ML is a premium machine learning ecosystem designed for extreme performance. 
+                Unified ML Pipelines is a premium machine learning ecosystem designed for extreme performance. 
                 Our engine parallelizes complex mathematical operations to deliver hyper-optimized models 
                 in record time.
             </p>
