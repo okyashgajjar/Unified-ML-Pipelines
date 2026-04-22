@@ -148,15 +148,12 @@ def train_classification_background(job_id: str, df: pd.DataFrame, target: str, 
         print(f"[Job {job_id}] Target column: '{target}'")
         print(f"[Job {job_id}] Columns: {list(df.columns)}")
         
-        # Define classification model families
         model_functions = [
             ('Weight-Based Classifiers', weight_based_classifier),
             ('Tree-Based Classifiers', tree_based_classifier),
             ('Neural Network Classifiers', nn_classifier),
             ('Kernel-Based Classifiers', kernel_based_classifier),
-            ('Kernel-Based Classifiers', kernel_based_classifier),
-            ('Instance-Based Classifiers', instance_based_classifier),
-            ('NLP Classification (if applicable)', nlp_classification)
+            ('Instance-Based Classifiers', instance_based_classifier)
         ]
         
         # Execute each model family and collect results
@@ -215,6 +212,57 @@ def train_classification_background(job_id: str, df: pd.DataFrame, target: str, 
         import traceback
         error_details = traceback.format_exc()
         print(f"[Job {job_id}] Classification training failed with error:")
+        print(error_details)
+        
+        training_jobs[job_id]['status'] = 'failed'
+        training_jobs[job_id]['error'] = str(e)
+        training_jobs[job_id]['error_details'] = error_details
+        training_jobs[job_id]['completed_at'] = datetime.now().isoformat()
+
+# Background task for NLP-specific classification training
+def train_nlp_classification_background(job_id: str, df: pd.DataFrame, target: str, enable_mlflow: bool):
+    """
+    Background task for text-based classification using NLP techniques.
+    """
+    try:
+        training_jobs[job_id]['status'] = 'running'
+        training_jobs[job_id]['started_at'] = datetime.now().isoformat()
+        
+        print(f"[Job {job_id}] Starting NLP-specific classification training...")
+        
+        # Run NLP classification
+        results_df = nlp_classification(df, target)
+        
+        # Sort by accuracy
+        if 'accuracy' in results_df.columns:
+            results_df = results_df.sort_values(by='accuracy', ascending=False, na_position='last')
+        
+        # Log to MLFlow if enabled
+        if enable_mlflow:
+            try:
+                tracker = MLFlowTracker(experiment_name=f"NLP_Job_{job_id}")
+                tracker.log_family_results(results_df, "NLP Classification")
+            except Exception as mlflow_error:
+                print(f"MLFlow logging failed: {str(mlflow_error)}")
+        
+        # Convert results to dict
+        results_dict = results_df.drop(columns=['pipeline'], errors='ignore').to_dict(orient='records')
+        
+        # Save models as ZIP
+        zip_path = save_models_as_zip(results_df, job_id=job_id)
+        
+        # Update job status
+        training_jobs[job_id]['status'] = 'completed'
+        training_jobs[job_id]['results'] = results_dict
+        training_jobs[job_id]['models_zip'] = zip_path
+        training_jobs[job_id]['completed_at'] = datetime.now().isoformat()
+        
+        print(f"[Job {job_id}] NLP training completed successfully!")
+        
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"[Job {job_id}] NLP training failed with error:")
         print(error_details)
         
         training_jobs[job_id]['status'] = 'failed'
