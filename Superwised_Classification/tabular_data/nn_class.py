@@ -5,7 +5,7 @@ import sklearn
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import train_test_split
 # Evaluation Metrics
-from sklearn.metrics import accuracy_score, precision_score, classification_report, roc_auc_score
+from sklearn.metrics import accuracy_score, precision_score, f1_score, classification_report, roc_auc_score
 # PCA
 from sklearn.decomposition import PCA
 # Scaling
@@ -130,14 +130,16 @@ def neural_network(df, target) :
 
         acc_score = accuracy_score(y_test, y_pred)
         prec_score = precision_score(y_test, y_pred, average='weighted')
+        f1_score_val = f1_score(y_test, y_pred, average='weighted')
         class_report = classification_report(y_test, y_pred)
 
         all_results.append({
             'model_name': model_name,
             'best_params': best_params,
-            'pipeline': pipeline,
+            'pipeline': best_model,
             'accuracy': acc_score,
             'precision': prec_score,
+            'f1_score': f1_score_val,
             'status': 'success',
             'error': None
         })
@@ -149,6 +151,7 @@ def neural_network(df, target) :
             'pipeline': None,
             'accuracy': None,
             'precision': None,
+            'f1_score': None,
             'status': 'failed',
             'error': str(model_error)
         })
@@ -162,6 +165,7 @@ def neural_network(df, target) :
         'pipeline': None,
         'accuracy': None,
         'precision': None,
+        'f1_score': None,
         'status': 'failed',
         'error': f"Neural network classifier family failed: {str(e)}"
     }])

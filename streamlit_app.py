@@ -114,6 +114,17 @@ def get_all_jobs() -> Optional[dict]:
         st.error(f"Failed to fetch jobs: {str(e)}")
         return None
 
+def download_model_zip(job_id: str) -> Optional[bytes]:
+    """Fetch model ZIP from API"""
+    try:
+        response = requests.get(f"{API_BASE_URL}/api/download/{job_id}")
+        if response.status_code == 200:
+            return response.content
+        return None
+    except Exception as e:
+        st.error(f"Failed to download models: {str(e)}")
+        return None
+
 # Main app
 def main():
     # Header
@@ -162,10 +173,10 @@ def show_home_page():
         
         **Key Features:**
         - ✅ **Regression & Classification** support
+        - ✅ **NLP specialized pipeline** (TF-IDF & Word2Vec)
+        - ✅ **Model Export**: Download trained models as ZIP
         - ✅ Parallel execution (2x faster)
-        - ✅ Error handling at all levels
         - ✅ MLFlow experiment tracking
-        - ✅ RESTful API backend
         - ✅ Interactive Streamlit UI
         """)
     
@@ -184,6 +195,7 @@ def show_home_page():
         - Neural Networks (MLP Classifier)
         - Kernel-Based (SVC)
         - Instance-Based (KNN)
+        - **NLP Models** (TF-IDF + Word2Vec)
         """)
     
     st.divider()
@@ -317,9 +329,9 @@ def fetch_and_display_results(job_id: str, auto_refresh: bool = False):
         st.balloons()  # Celebrate completion
         
         # Display results
-        display_training_results(result['results'])
+        display_training_results(result['results'], job_id)
 
-def display_training_results(results: list):
+def display_training_results(results: list, job_id: str = None):
     """Display training results with visualizations"""
     if not results:
         st.warning("No results available")
@@ -344,12 +356,12 @@ def display_training_results(results: list):
     
     if is_classification:
         # Classification Results Display
-        display_classification_results(df_success)
+        display_classification_results(df_success, job_id)
     else:
         # Regression Results Display
-        display_regression_results(df_success)
+        display_regression_results(df_success, job_id)
 
-def display_classification_results(df_success: pd.DataFrame):
+def display_classification_results(df_success: pd.DataFrame, job_id: str = None):
     """Display classification training results with visualizations"""
     
     # Top 3 models by Accuracy
@@ -361,11 +373,13 @@ def display_classification_results(df_success: pd.DataFrame):
         with cols[idx]:
             acc_val = row['accuracy'] if row['accuracy'] is not None else 0
             prec_val = row['precision'] if row['precision'] is not None else 0
+            f1_val = row.get('f1_score', 0) if row.get('f1_score') is not None else 0
             st.markdown(f"""
             <div class="metric-card">
                 <h4>#{idx+1} {row['model_name']}</h4>
                 <p><b>Accuracy:</b> {acc_val:.4f}</p>
                 <p><b>Precision:</b> {prec_val:.4f}</p>
+                <p><b>F1 Score:</b> {f1_val:.4f}</p>
             </div>
             """, unsafe_allow_html=True)
     
@@ -415,9 +429,10 @@ def display_classification_results(df_success: pd.DataFrame):
     for _, row in top_5.iterrows():
         acc_val = row['accuracy'] if row['accuracy'] is not None else 0
         prec_val = row['precision'] if row['precision'] is not None else 0
+        f1_val = row.get('f1_score', 0) if row.get('f1_score') is not None else 0
         fig_radar.add_trace(go.Scatterpolar(
-            r=[acc_val, prec_val],
-            theta=['Accuracy', 'Precision'],
+            r=[acc_val, prec_val, f1_val],
+            theta=['Accuracy', 'Precision', 'F1 Score'],
             fill='toself',
             name=row['model_name']
         ))
@@ -435,7 +450,7 @@ def display_classification_results(df_success: pd.DataFrame):
     st.subheader("📋 Detailed Results")
     
     # Format display columns - include best_params
-    display_cols = ['model_name', 'accuracy', 'precision', 'best_params']
+    display_cols = ['model_name', 'accuracy', 'precision', 'f1_score', 'best_params']
     available_cols = [c for c in display_cols if c in df_success.columns]
     display_df = df_success[available_cols].copy()
     display_df = display_df.sort_values('accuracy', ascending=False)
@@ -449,7 +464,8 @@ def display_classification_results(df_success: pd.DataFrame):
     st.dataframe(
         display_df.style.format({
             'accuracy': '{:.4f}',
-            'precision': '{:.4f}'
+            'precision': '{:.4f}',
+            'f1_score': '{:.4f}'
         }),
         use_container_width=True,
         height=400
@@ -497,8 +513,21 @@ def display_classification_results(df_success: pd.DataFrame):
         file_name="classification_results.csv",
         mime="text/csv"
     )
+    
+    if job_id:
+        st.subheader("📦 Export Models")
+        if st.button("Download All Trained Models (ZIP)", use_container_width=True):
+            zip_content = download_model_zip(job_id)
+            if zip_content:
+                st.download_button(
+                    label="Click here to save ZIP",
+                    data=zip_content,
+                    file_name=f"models_{job_id[:8]}.zip",
+                    mime="application/zip",
+                    use_container_width=True
+                )
 
-def display_regression_results(df_success: pd.DataFrame):
+def display_regression_results(df_success: pd.DataFrame, job_id: str = None):
     """Display regression training results with visualizations"""
     
     # Top 3 models by MAE
@@ -722,6 +751,19 @@ def display_regression_results(df_success: pd.DataFrame):
         file_name="model_results.csv",
         mime="text/csv"
     )
+    
+    if job_id:
+        st.subheader("📦 Export Models")
+        if st.button("Download All Trained Models (ZIP)", use_container_width=True, key="reg_zip"):
+            zip_content = download_model_zip(job_id)
+            if zip_content:
+                st.download_button(
+                    label="Click here to save ZIP",
+                    data=zip_content,
+                    file_name=f"models_{job_id[:8]}.zip",
+                    mime="application/zip",
+                    use_container_width=True
+                )
 
 def show_history_page():
     """Job history page"""

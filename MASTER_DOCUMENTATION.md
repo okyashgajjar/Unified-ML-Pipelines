@@ -1,4 +1,4 @@
-# ML Pipelines - Master Documentation v1.2
+# ML Pipelines - Master Documentation v2.0
 
 ## 📦 Project Overview
 
@@ -19,7 +19,8 @@
 ┌─────────────────────────────────────────────────────────┐
 │                   FASTAPI BACKEND                       │
 │                     (app.py)                            │
-│  POST /api/train │ GET /api/results │ GET /api/jobs     │
+│  POST /api/train │ GET /api/results │ GET /api/download │  │
+│  GET /api/jobs   │                  │                   │  │
 └─────────────────────┬───────────────────────────────────┘
                       │
                       ▼
@@ -27,10 +28,10 @@
 │              MODEL TRAINING ENGINE                      │
 │                                                         │
 │  ┌─────────────┬─────────────┬─────────────┬─────────┐  │
-│  │ Weight-Based│ Tree-Based  │ Neural Net  │Instance │  │
-│  │ Linear,Ridge│ RF,XGBoost  │ MLP         │ KNN     │  │
-│  │ Lasso       │ GBM,DT      │ Regressor   │ Radius  │  │
-│  └─────────────┴─────────────┴─────────────┴─────────┘  │
+│  │ Weight-Based│ Tree-Based  │ Neural Net  │Instance │ NLP    │  │
+│  │ Linear,Ridge│ RF,XGBoost  │ MLP         │ KNN      │ TF-IDF │  │
+│  │ Lasso       │ GBM,DT      │ Regressor   │ Radius   │ W2V    │  │
+│  └─────────────┴─────────────┴─────────────┴──────────┴────────┘  │
 │                Sequential Execution                     │
 └─────────────────────┬───────────────────────────────────┘
                       │
@@ -78,8 +79,12 @@ ml-pipelines/
 │       ├── nn_class.py          # MLP Classifier
 │       ├── kernel_class.py      # SVC (RBF, Linear, Poly)
 │       └── instance_class.py    # KNN Classifier
+│   └── nlp_data/
+│       ├── nlp_class.py         # NLP Classification Pipeline
+│       └── __init__.py          # Package initialization
 │
-└── mlruns/                  # MLFlow experiment data
+├── model_utils.py               # Model export & ZIP utility
+└── mlruns/                      # MLFlow experiment data
 ```
 
 ---
@@ -139,6 +144,7 @@ mlflow ui
 | **Neural Network** | MLP Classifier | StandardScaler + OneHotEncoder + PCA | RandomizedSearchCV |
 | **Kernel-Based** | SVC | StandardScaler + OneHotEncoder + PCA | RandomizedSearchCV |
 | **Instance-Based** | KNN | StandardScaler (numeric only) | GridSearchCV |
+| **NLP-Based** | Logistic, SVC, RF, MLP | TF-IDF / Word2Vec | Pipeline-specific |
 
 ---
 
@@ -176,6 +182,12 @@ Response: {
 ```
 GET /api/jobs
 Response: { "total": 5, "jobs": [...] }
+```
+
+### Download Models (New!)
+```
+GET /api/download/{job_id}
+Response: ZIP file containing pickled models
 ```
 
 ---
@@ -249,9 +261,12 @@ Response: { "total": 5, "jobs": [...] }
 | Streamlit Frontend | ✅ |
 | Outlier Analysis | ✅ |
 | Hyperparameters in Results | ✅ |
-| **Classification Pipelines** | ✅ NEW |
-| **Industry-Level Error Handling** | ✅ NEW |
-| **DataFrame Return with Status/Error** | ✅ NEW |
+| **Classification Pipelines** | ✅ |
+| **Industry-Level Error Handling** | ✅ |
+| **DataFrame Return with Status/Error** | ✅ |
+| **NLP Specialized Pipeline** | ✅ NEW |
+| **Model Download ZIP Export** | ✅ NEW |
+| **F1 Score Metric Support** | ✅ NEW |
 
 ---
 
@@ -271,11 +286,14 @@ All classification files now use:
 3. **Model-level try-except** - Each model runs independently, failures don't stop others
 4. **DataFrame Return** - Returns results with `status` and `error` columns
 
-### Optimized Param Grids
-- Reduced hyperparameter search space by ~80%
-- 3-fold CV for faster training
-- Industry-optimized default values
+### NLP Pipelines Added (v2.0)
+- **Specialized Vectorizers**: Uses TF-IDF for linear models and Word2Vec for non-linear models.
+- **Pre-cleaning**: Automated links/emojis/punctuation removal.
+
+### Model Export Facility (v2.0)
+- **ZIP Packaging**: All successful models from a job are zipped.
+- **Production Ready**: Serialized via `pickle`, containing both preprocessing and model.
 
 ---
 
-*Last Updated: 2026-01-29*
+*Last Updated: April 2026*

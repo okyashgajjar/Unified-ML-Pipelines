@@ -92,7 +92,7 @@ def instance_based_model(df, target):
                 all_results.append({
                     'model_name': model_name,
                     'best_params': grid.best_params_,
-                    'pipeline': pipeline,
+                    'pipeline': grid.best_estimator_,
                     'mse': mse,
                     'rmse': np.sqrt(mse),
                     'r2': r2,

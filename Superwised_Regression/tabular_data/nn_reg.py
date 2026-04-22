@@ -104,7 +104,7 @@ def neural_network(df, target) :
             'model_name': 'Neural Network MLP Regressor',
             # 'best_model' : best_model,
             'best_params' : best_params,
-            'pipeline': pipeline,
+            'pipeline': best_model,
             'mse': mse,
             'rmse': np.sqrt(mse),
             'r2': r2,

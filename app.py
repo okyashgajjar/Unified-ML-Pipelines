@@ -1,6 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, BackgroundTasks, Form
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
 import pandas as pd
@@ -15,6 +15,7 @@ from Superwised_Regression.tabular_data.instance_reg import instance_based_model
 from Superwised_Regression.tabular_data.parallel_executor import execute_model_families_parallel
 from Superwised_Regression.tabular_data.mlflow_tracker import MLFlowTracker
 from Superwised_Regression.preprocessing import datacleaning
+from model_utils import save_models_as_zip
 
 # Classification imports
 from Superwised_Classification.tabular_data.weight_class import weight_based as weight_based_classifier
@@ -22,6 +23,7 @@ from Superwised_Classification.tabular_data.tree_class import tree_based as tree
 from Superwised_Classification.tabular_data.nn_class import neural_network as nn_classifier
 from Superwised_Classification.tabular_data.kernel_class import kernel_based as kernel_based_classifier
 from Superwised_Classification.tabular_data.instance_class import instance_based as instance_based_classifier
+from Superwised_Classification.nlp_data.nlp_class import nlp_classification
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -110,9 +112,13 @@ def train_models_background(job_id: str, df: pd.DataFrame, target: str, use_para
         # Convert results to dict (excluding pipeline objects)
         results_dict = results_df.drop(columns=['pipeline'], errors='ignore').to_dict(orient='records')
         
+        # Save models as ZIP
+        zip_path = save_models_as_zip(results_df, job_id=job_id)
+        
         # Update job status
         training_jobs[job_id]['status'] = 'completed'
         training_jobs[job_id]['results'] = results_dict
+        training_jobs[job_id]['models_zip'] = zip_path
         training_jobs[job_id]['completed_at'] = datetime.now().isoformat()
         
         print(f"[Job {job_id}] Training completed successfully!")
@@ -148,7 +154,9 @@ def train_classification_background(job_id: str, df: pd.DataFrame, target: str, 
             ('Tree-Based Classifiers', tree_based_classifier),
             ('Neural Network Classifiers', nn_classifier),
             ('Kernel-Based Classifiers', kernel_based_classifier),
-            ('Instance-Based Classifiers', instance_based_classifier)
+            ('Kernel-Based Classifiers', kernel_based_classifier),
+            ('Instance-Based Classifiers', instance_based_classifier),
+            ('NLP Classification (if applicable)', nlp_classification)
         ]
         
         # Execute each model family and collect results
@@ -167,6 +175,7 @@ def train_classification_background(job_id: str, df: pd.DataFrame, target: str, 
                     'pipeline': None,
                     'accuracy': None,
                     'precision': None,
+                    'f1_score': None,
                     'status': 'failed',
                     'error': str(family_error)
                 }]))
@@ -191,9 +200,13 @@ def train_classification_background(job_id: str, df: pd.DataFrame, target: str, 
         # Convert results to dict (excluding pipeline objects)
         results_dict = results_df.drop(columns=['pipeline'], errors='ignore').to_dict(orient='records')
         
+        # Save models as ZIP
+        zip_path = save_models_as_zip(results_df, job_id=job_id)
+        
         # Update job status
         training_jobs[job_id]['status'] = 'completed'
         training_jobs[job_id]['results'] = results_dict
+        training_jobs[job_id]['models_zip'] = zip_path
         training_jobs[job_id]['completed_at'] = datetime.now().isoformat()
         
         print(f"[Job {job_id}] Classification training completed successfully!")
@@ -401,6 +414,29 @@ async def list_experiments():
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to fetch experiments: {str(e)}")
+
+@app.get("/api/download/{job_id}")
+async def download_models(job_id: str):
+    """
+    Download trained models for a specific job ID as a ZIP file.
+    """
+    if job_id not in training_jobs:
+        raise HTTPException(status_code=404, detail="Job ID not found")
+    
+    job = training_jobs[job_id]
+    if job['status'] != 'completed':
+        raise HTTPException(status_code=400, detail=f"Job status is {job['status']}. Wait for completion.")
+    
+    zip_path = job.get('models_zip')
+    if not zip_path or not os.path.exists(zip_path):
+        raise HTTPException(status_code=404, detail="Model ZIP file not found")
+    
+    filename = os.path.basename(zip_path)
+    return FileResponse(
+        path=zip_path,
+        filename=filename,
+        media_type='application/zip'
+    )
 
 @app.delete("/api/jobs/{job_id}")
 async def delete_job(job_id: str):

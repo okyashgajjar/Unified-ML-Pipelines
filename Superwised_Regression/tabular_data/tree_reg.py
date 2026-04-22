@@ -151,7 +151,7 @@ def tree_based_model(df, target) :
                     'model_name' : model_name,
                     # 'best_model' : best_model,
                     'best_params' : best_params,
-                    'pipeline': pipeline,
+                    'pipeline': best_model,
                     'mse': mse,
                     'rmse': np.sqrt(mse),
                     'r2': r2,

@@ -7,7 +7,7 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier,
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
 # Evaluation Metrics
-from sklearn.metrics import accuracy_score, precision_score, classification_report, roc_auc_score
+from sklearn.metrics import accuracy_score, precision_score, f1_score, classification_report, roc_auc_score
 # PCA
 from sklearn.decomposition import PCA
 # Scaling
@@ -149,14 +149,16 @@ def tree_based(df, target) :
 
         acc_score = accuracy_score(y_test, y_pred)
         prec_score = precision_score(y_test, y_pred, average='weighted')
+        f1_score_val = f1_score(y_test, y_pred, average='weighted')
         class_report = classification_report(y_test, y_pred)
 
         all_results.append({
             'model_name': model_name,
             'best_params': best_params,
-            'pipeline': pipeline,
+            'pipeline': best_model,
             'accuracy': acc_score,
             'precision': prec_score,
+            'f1_score': f1_score_val,
             'status': 'success',
             'error': None
         })
@@ -168,6 +170,7 @@ def tree_based(df, target) :
             'pipeline': None,
             'accuracy': None,
             'precision': None,
+            'f1_score': None,
             'status': 'failed',
             'error': str(model_error)
         })
@@ -181,6 +184,7 @@ def tree_based(df, target) :
         'pipeline': None,
         'accuracy': None,
         'precision': None,
+        'f1_score': None,
         'status': 'failed',
         'error': f"Tree-based classifier family failed: {str(e)}"
     }])

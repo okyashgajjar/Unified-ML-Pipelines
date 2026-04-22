@@ -17,8 +17,8 @@ try:
     from Superwised_Regression.tabular_data.instance_reg import instance_based_model
     # We use sequential execution for safer deployment on shared resources like HF Spaces
     from Superwised_Regression.tabular_data.parallel_executor import execute_model_families_sequential
-    from Superwised_Regression.tabular_data.mlflow_tracker import MLFlowTracker
     from Superwised_Regression.preprocessing import datacleaning
+    from model_utils import save_models_as_zip
     
     # Classification imports
     from Superwised_Classification.tabular_data.weight_class import weight_based as weight_based_classifier
@@ -26,6 +26,7 @@ try:
     from Superwised_Classification.tabular_data.nn_class import neural_network as nn_classifier
     from Superwised_Classification.tabular_data.kernel_class import kernel_based as kernel_based_classifier
     from Superwised_Classification.tabular_data.instance_class import instance_based as instance_based_classifier
+    from Superwised_Classification.nlp_data.nlp_class import nlp_classification
 except ImportError as e:
     st.error(f"Critical Error: Failed to import ML modules. Make sure you are in the root directory. Error: {e}")
     st.stop()
@@ -140,9 +141,13 @@ def run_training_pipeline(df: pd.DataFrame, target_column: str, use_parallel: bo
         # Convert results
         results_dict = results_df.drop(columns=['pipeline'], errors='ignore').to_dict(orient='records')
         
+        # Save models as ZIP
+        zip_path = save_models_as_zip(results_df, job_id=job_id)
+        
         # Update Job Success
         st.session_state['jobs'][job_id]['status'] = 'completed'
         st.session_state['jobs'][job_id]['results'] = results_dict
+        st.session_state['jobs'][job_id]['models_zip'] = zip_path
         st.session_state['jobs'][job_id]['completed_at'] = datetime.now().isoformat()
         
         return True, "Training completed successfully"
@@ -170,7 +175,8 @@ def run_classification_pipeline(df: pd.DataFrame, target_column: str, enable_mlf
             ('Tree-Based Classifiers', tree_based_classifier),
             ('Neural Network Classifiers', nn_classifier),
             ('Kernel-Based Classifiers', kernel_based_classifier),
-            ('Instance-Based Classifiers', instance_based_classifier)
+            ('Instance-Based Classifiers', instance_based_classifier),
+            ('NLP Classification (if applicable)', nlp_classification)
         ]
         
         # Execute each model family and collect results
@@ -189,6 +195,7 @@ def run_classification_pipeline(df: pd.DataFrame, target_column: str, enable_mlf
                     'pipeline': None,
                     'accuracy': None,
                     'precision': None,
+                    'f1_score': None,
                     'status': 'failed',
                     'error': str(family_error)
                 }]))
@@ -219,9 +226,13 @@ def run_classification_pipeline(df: pd.DataFrame, target_column: str, enable_mlf
         # Convert results
         results_dict = results_df.drop(columns=['pipeline'], errors='ignore').to_dict(orient='records')
         
+        # Save models as ZIP
+        zip_path = save_models_as_zip(results_df, job_id=job_id)
+        
         # Update Job Success
         st.session_state['jobs'][job_id]['status'] = 'completed'
         st.session_state['jobs'][job_id]['results'] = results_dict
+        st.session_state['jobs'][job_id]['models_zip'] = zip_path
         st.session_state['jobs'][job_id]['completed_at'] = datetime.now().isoformat()
         
         return True, "Classification training completed successfully"
@@ -448,11 +459,13 @@ def display_classification_results(df_success: pd.DataFrame):
         with cols[idx]:
             acc_val = row['accuracy'] if row['accuracy'] is not None else 0
             prec_val = row['precision'] if row['precision'] is not None else 0
+            f1_val = row.get('f1_score', 0) if row.get('f1_score') is not None else 0
             st.markdown(f"""
             <div class="metric-card">
                 <h4>#{idx+1} {row['model_name']}</h4>
                 <p><b>Accuracy:</b> {acc_val:.4f}</p>
                 <p><b>Precision:</b> {prec_val:.4f}</p>
+                <p><b>F1 Score:</b> {f1_val:.4f}</p>
             </div>
             """, unsafe_allow_html=True)
             
@@ -653,7 +666,7 @@ def display_classification_results(df_success: pd.DataFrame):
 
     # Detailed results table
     st.subheader("📋 Detailed Results")
-    display_cols = ['model_name', 'accuracy', 'precision', 'best_params']
+    display_cols = ['model_name', 'accuracy', 'precision', 'f1_score', 'best_params']
     available_cols = [c for c in display_cols if c in df_success.columns]
     display_df = df_success[available_cols].copy()
     display_df = display_df.sort_values('accuracy', ascending=False)
@@ -682,6 +695,18 @@ def display_classification_results(df_success: pd.DataFrame):
         file_name="classification_results.csv",
         mime="text/csv"
     )
+    
+    # Model Download ZIP
+    zip_path = st.session_state['jobs'][st.session_state['current_job_id']].get('models_zip')
+    if zip_path and os.path.exists(zip_path):
+        with open(zip_path, "rb") as f:
+            st.download_button(
+                label="📦 Download All Trained Models (ZIP)",
+                data=f,
+                file_name=os.path.basename(zip_path),
+                mime="application/zip",
+                use_container_width=True
+            )
 
 def display_regression_results(df_success: pd.DataFrame):
     """Display regression results with MAE/R² metrics"""
@@ -790,6 +815,18 @@ def display_regression_results(df_success: pd.DataFrame):
         file_name="model_results.csv",
         mime="text/csv"
     )
+    
+    # Model Download ZIP
+    zip_path = st.session_state['jobs'][st.session_state['current_job_id']].get('models_zip')
+    if zip_path and os.path.exists(zip_path):
+        with open(zip_path, "rb") as f:
+            st.download_button(
+                label="📦 Download All Trained Models (ZIP)",
+                data=f,
+                file_name=os.path.basename(zip_path),
+                mime="application/zip",
+                use_container_width=True
+            )
 
 
 def show_history_page():

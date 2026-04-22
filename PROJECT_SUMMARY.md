@@ -119,6 +119,31 @@ Examples:
 
 ---
 
+## NLP Specialized Pipelines (v2.0)
+
+For text data, we move beyond simple scaling to **Semantic Vectorization**:
+
+### 1. TF-IDF + N-Grams
+- **Best for**: Logistic Regression, LinearSVC.
+- **Why**: Linear models excel at high-dimensional sparse representations.
+
+### 2. Word2Vec (Avg Pooling)
+- **Best for**: Trees, KNN, MLP, SVC-RBF.
+- **Why**: Dense semantic vectors allow distance and split-based models to "understand" context rather than just exact word matches.
+
+---
+
+## Model Export & Portability (v2.0)
+
+We treat models as **reusable assets**, not just static results.
+
+**Logic:**
+- Automated **Pickle serialization** of the full pipeline (Cleaners -> Vectorizers -> Scalers -> Model).
+- **ZIP Packaging** for easy distribution.
+- **Job-linked metadata** for tracking which data produced which model.
+
+---
+
 ## Parallel Pipeline Execution
 
 Each model family runs in an **independent pipeline**.
@@ -185,28 +210,29 @@ This ensures:
 
 ✔ Tabular data  
 ✔ Regression pipelines  
-✔ **Classification pipelines** (NEW)  
+✔ **Classification pipelines**  
+✔ **NLP pipelines** (NEW)  
 ✔ Four model families (Regression)  
 ✔ Five model families (Classification)  
+✔ **Model Export ZIP** (NEW)  
+✔ **F1 Score Metrics** (NEW)  
 ✔ GridSearchCV / RandomizedSearchCV  
 ✔ Multi-metric evaluation  
 ✔ MAE-based ranking (Regression)  
 ✔ Accuracy-based ranking (Classification)  
-✔ **error handling** (NEW)  
-✔ **DataFrame return with status/error** (NEW)
+✔ **error handling**  
+✔ **DataFrame return with status/error** 
 
 ---
 
 ## Future Expansion
 
-- ~~Classification pipelines~~ ✅ DONE
+- NLP pipelines ✅ DONE
 - Time-series pipelines
-- NLP pipelines
 - Unsupervised learning
 - Deep learning & OpenCV workflows
 - Distributed execution
-- Web interface for Classification
-
+- Web interface for Classification ✅ DONE
 ---
 
 ## Key Takeaway

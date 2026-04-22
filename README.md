@@ -32,6 +32,8 @@ This application allows you to train multiple families of Machine Learning model
 - ✅ **14+ ML Models**: Comprehensive model coverage across all families
 - ✅ **Hyperparameter Tuning**: GridSearchCV and RandomizedSearchCV with optimized grids
 - ✅ **MLFlow Integration**: Full experiment tracking, metrics logging, and model versioning
+- ✅ **Model Download Facility**: Export all trained models as a ZIP archive for production use
+- ✅ **NLP Pipeline**: Specialized vectorization logic for text data classification
 
 ### Results & Analysis
 - ✅ **Interactive Visualizations**: Plotly charts for model comparison
@@ -106,12 +108,17 @@ Unified-ML-Pipelines/
 │       └── mlflow_tracker.py       # MLFlow integration
 │
 ├── Superwised_Classification/
-│   └── tabular_data/
-│       ├── weight_class.py         # Logistic Regression, Ridge Classifier
-│       ├── tree_class.py           # DT, RF, GBM, AdaBoost, LightGBM, XGBoost
-│       ├── nn_class.py             # MLP Classifier
-│       ├── kernel_class.py         # SVC (RBF, Linear, Poly)
-│       └── instance_class.py       # KNN Classifier
+│   ├── tabular_data/
+│   │   ├── weight_class.py         # Logistic Regression, Ridge Classifier
+│   │   ├── tree_class.py           # DT, RF, GBM, AdaBoost, LightGBM, XGBoost
+│   │   ├── nn_class.py             # MLP Classifier
+│   │   ├── kernel_class.py         # SVC (RBF, Linear, Poly)
+│   │   └── instance_class.py       # KNN Classifier
+│   └── nlp_data/
+│       ├── nlp_class.py            # NLP Classification Pipeline
+│       └── __init__.py             # Package initialization
+│
+├── model_utils.py                  # Model export & ZIP utility
 │
 ├── dataset/                        # Sample datasets
 ├── mlruns/                         # MLFlow experiment data
@@ -141,6 +148,27 @@ Unified-ML-Pipelines/
 | **Neural Network** | MLP Classifier |
 | **Kernel-Based** | SVC (RBF, Linear, Poly) |
 | **Instance-Based** | KNN Classifier |
+
+---
+
+## 🧠 NLP Intelligence: Why Vectorizers Matter
+
+The choice of vectorization is mathematically linked to the model family's internal logic:
+
+*   **TF-IDF & N-Grams (1,2)** → *Best for Linear Models (Logistic, Ridge, LinearSVC)*
+    *   **Why?** Linear models exploit sparsity directly via dot products on weights. TF-IDF's importance weighting aligns perfectly with how these models assign feature weights. N-grams capture crucial context (e.g., "not good") that unigrams miss.
+*   **Word2Vec (Dense Embeddings)** → *Best for Non-Linear Models (Trees, MLP, KNN, SVC-RBF)*
+    *   **Why?** Distance-based models (KNN, SVC) and splitting models (Trees) fail on high-dim sparse binary vectors. Dense 200-dim semantic embeddings encode word relationships, allowing these models to "understand" context and meaning.
+
+---
+
+## 📦 Model Export & Portability
+
+We now provide a **Model Download Facility** using Python's `pickle` serialization:
+
+- **ZIP Archiving**: Download all successfully trained models from any job as a single compressed archive.
+- **Production Ready**: Each `.pkl` file contains the **complete pipeline** (preprocessors + tuned model), ready for immediate inference using `pickle.load()`.
+- **Versioned Exports**: All exports are timestamped and linked to their specific Job ID for easy tracking.
 
 ---
 
@@ -176,8 +204,8 @@ Unified-ML-Pipelines/
 |----------|--------|-------------|
 | `/api/health` | GET | Health check with version info |
 | `/api/train` | POST | Submit training job with CSV file |
-| `/api/train-classification` | POST | Submit classification training job |
 | `/api/results/{job_id}` | GET | Get training results |
+| `/api/download/{job_id}` | GET | Download trained models as ZIP |
 | `/api/jobs` | GET | List all training jobs |
 
 ---
