@@ -249,8 +249,8 @@ def show_train_page():
             with col2:
                 learning_type = st.selectbox(
                     "Learning Type",
-                    options=["Regression", "Classification"],
-                    help="Choose Regression for continuous targets, Classification for categorical"
+                    options=["Regression", "Classification", "NLP Classification"],
+                    help="Choose Regression for numbers, Classification for categories, NLP for text"
                 )
             
             with col3:

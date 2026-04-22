@@ -308,8 +308,16 @@ async def train_models(
             'filename': file.filename
         }
         
-        # Start background training based on learning type
-        if learning_type_str == "classification":
+        # Run training based on learning type
+        if learning_type_str == 'nlp classification':
+            background_tasks.add_task(
+                train_nlp_classification_background,
+                job_id,
+                df,
+                target_column,
+                enable_mlflow_bool
+            )
+        elif learning_type_str == "classification":
             background_tasks.add_task(
                 train_classification_background,
                 job_id,

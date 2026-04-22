@@ -245,6 +245,53 @@ def run_classification_pipeline(df: pd.DataFrame, target_column: str, enable_mlf
         st.session_state['jobs'][job_id]['completed_at'] = datetime.now().isoformat()
         return False, str(e)
 
+def run_nlp_pipeline(df: pd.DataFrame, target_column: str, enable_mlflow: bool, job_id: str):
+    """
+    Executes the NLP-specific classification training pipeline.
+    """
+    try:
+        # Update status
+        st.session_state['jobs'][job_id]['status'] = 'running'
+        st.session_state['jobs'][job_id]['started_at'] = datetime.now().isoformat()
+        
+        # Run NLP classification
+        print(f"Running NLP Classification...")
+        results_df = nlp_classification(df, target_column)
+        print(f"✓ NLP Classification completed successfully")
+        
+        # Sort by accuracy
+        if 'accuracy' in results_df.columns:
+            results_df = results_df.sort_values(by='accuracy', ascending=False, na_position='last')
+        
+        # MLFlow Logging (Optional)
+        if enable_mlflow:
+            try:
+                tracker = MLFlowTracker(experiment_name=f"NLP_Job_{job_id}")
+                tracker.log_family_results(results_df, "NLP Classification")
+            except Exception as e:
+                print(f"MLFlow logging warning: {e}")
+        
+        # Convert results
+        results_dict = results_df.drop(columns=['pipeline'], errors='ignore').to_dict(orient='records')
+        
+        # Save models as ZIP
+        zip_path = save_models_as_zip(results_df, job_id=job_id)
+        
+        # Update Job Success
+        st.session_state['jobs'][job_id]['status'] = 'completed'
+        st.session_state['jobs'][job_id]['results'] = results_dict
+        st.session_state['jobs'][job_id]['models_zip'] = zip_path
+        st.session_state['jobs'][job_id]['completed_at'] = datetime.now().isoformat()
+        
+        return True, "NLP training completed successfully"
+
+    except Exception as e:
+        import traceback
+        st.session_state['jobs'][job_id]['status'] = 'failed'
+        st.session_state['jobs'][job_id]['error'] = str(e)
+        st.session_state['jobs'][job_id]['completed_at'] = datetime.now().isoformat()
+        return False, str(e)
+
 # --- UI Functions ---
 
 def main():
@@ -324,8 +371,8 @@ def show_train_page():
             with col2:
                 learning_type = st.selectbox(
                     "Learning Type",
-                    options=["Regression", "Classification"],
-                    help="Choose Regression for continuous targets, Classification for categorical"
+                    options=["Regression", "Classification", "NLP Classification"],
+                    help="Regression for numbers, Classification for categories, NLP for text data"
                 )
             with col3:
                 # Parallel might be unstable on free tiers, keep option but default to what's safe
@@ -365,6 +412,11 @@ def show_train_page():
                     if learning_type.lower() == "classification":
                         progress_placeholder.info(f"🔄 Training classification models on target '{target_column}'...")
                         success, message = run_classification_pipeline(
+                            df_clean, target_column, enable_mlflow, job_id
+                        )
+                    elif learning_type.lower() == "nlp classification":
+                        progress_placeholder.info(f"🔄 Training NLP models on text for target '{target_column}'...")
+                        success, message = run_nlp_pipeline(
                             df_clean, target_column, enable_mlflow, job_id
                         )
                     else:
