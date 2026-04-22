@@ -40,51 +40,112 @@ st.set_page_config(
 )
 
 # --- Custom CSS ---
+# Custom CSS for Modern UI
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .main {
+        background: radial-gradient(circle at top right, #1e1e2f, #121212);
+    }
+    
+    /* Glassmorphism containers */
+    .stApp {
+        background: #0e1117;
+    }
+    
+    [data-testid="stSidebar"] {
+        background-color: rgba(17, 25, 40, 0.75);
+        backdrop-filter: blur(10px);
+        border-right: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
     .main-header {
-        font-size: 2.5rem;
-        font-weight: bold;
-        color: #1f77b4;
+        font-size: 3rem;
+        font-weight: 700;
+        background: linear-gradient(90deg, #00f2fe 0%, #4facfe 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         text-align: center;
+        margin-bottom: 0.5rem;
+        letter-spacing: -1px;
+    }
+    
+    .sub-header {
+        font-size: 1.1rem;
+        color: #a0a0a0;
+        text-align: center;
+        margin-bottom: 3rem;
+        font-weight: 300;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+    }
+    
+    /* Metric Cards */
+    .metric-card {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(5px);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.3s ease;
         margin-bottom: 1rem;
     }
-    .sub-header {
-        font-size: 1.2rem;
-        color: #666;
-        text-align: center;
-        margin-bottom: 2rem;
+    
+    .metric-card:hover {
+        transform: translateY(-5px);
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(0, 242, 254, 0.5);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
     }
-    .metric-card {
-        background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
-        padding: 1rem;
-        border-radius: 0.5rem;
-        margin: 0.5rem 0;
-        color: #1a1a2e;
-        border: 2px solid #e6a800;
-    }
+    
     .metric-card h4 {
-        color: #1a1a2e;
-        margin-bottom: 0.5rem;
+        color: #00f2fe;
+        margin-top: 0;
+        font-size: 1.2rem;
+        font-weight: 600;
     }
+    
     .metric-card p {
-        color: #2d2d44;
-        margin: 0.3rem 0;
+        color: #e0e0e0;
+        margin: 0.4rem 0;
+        font-size: 0.95rem;
     }
+    
+    .metric-value {
+        font-size: 1.4rem;
+        font-weight: 700;
+        color: #ffffff;
+    }
+
+    /* Buttons */
+    .stButton>button {
+        background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        border: none;
+        padding: 0.6rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .stButton>button:hover {
+        transform: scale(1.02);
+        box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+    }
+
     .success-box {
-        background-color: #d4edda;
-        border: 1px solid #c3e6cb;
-        color: #155724;
+        background: rgba(0, 255, 127, 0.1);
+        border-left: 5px solid #00ff7f;
         padding: 1rem;
         border-radius: 0.5rem;
-        margin: 1rem 0;
-    }
-    .error-box {
-        background-color: #f8d7da;
-        border: 1px solid #f5c6cb;
-        color: #721c24;
-        padding: 1rem;
-        border-radius: 0.5rem;
+        color: #00ff7f;
         margin: 1rem 0;
     }
 </style>
@@ -296,8 +357,8 @@ def run_nlp_pipeline(df: pd.DataFrame, target_column: str, enable_mlflow: bool, 
 
 def main():
     # Header
-    st.markdown('<div class="main-header">🤖 Unified ML Pipelines</div>', unsafe_allow_html=True)
-    st.markdown('<div class="sub-header">Mathematics-Driven Hyperparameter tuned ML Pipelines</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-header">STITCH ML</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sub-header">Advanced Parallel Neural Engine • v3.0</div>', unsafe_allow_html=True)
     
     # Sidebar
     with st.sidebar:
@@ -318,37 +379,44 @@ def main():
         show_history_page()
 
 def show_home_page():
-    st.header("Welcome to Unified ML Pipelines v2.0")
+    st.header("Welcome to Unified ML Pipelines v3.0")
     col1, col2 = st.columns(2)
     with col1:
-        st.subheader("📚 About")
         st.markdown("""
-        This app demonstrates **Mathematics driven Hyperparameter tuned ML Pipelines**
-        Now supporting both **Regression** and **Classification** tasks!
-        
-        **Key Features:**
-        - ✅ **Regression & Classification** support
-        - ✅ Consolidated App (Frontend + Backend)
-        - ✅ Multi-Family Model Training
-        - ✅ Automatic Preprocessing
-        - ✅ Interactive Visualizations
-        """)
-    # with col2:
-    #     st.subheader("🎯 Model Families")
-    #     st.markdown("""
-    #     **Regression Models:**
-    #     - Weight-Based (Linear, Ridge, Lasso)
-    #     - Tree-Based (RF, XGBoost, GBM)
-    #     - Neural Networks (MLP)
-    #     - Instance-Based (KNN)
-        
-    #     **Classification Models:**
-    #     - Weight-Based (Logistic, Ridge)
-    #     - Tree-Based (DT, RF, GBM, LightGBM)
-    #     - Neural Networks (MLP)
-    #     - Kernel-Based (SVC)
-    #     - Instance-Based (KNN)
-    #     """)
+        <div style="background: rgba(255,255,255,0.03); padding: 2rem; border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05);">
+            <h3 style="color: #00f2fe; margin-top: 0;">🚀 Project Genesis</h3>
+            <p style="color: #a0a0a0; font-size: 1.1rem; line-height: 1.6;">
+                STITCH ML is a premium machine learning ecosystem designed for extreme performance. 
+                Our engine parallelizes complex mathematical operations to deliver hyper-optimized models 
+                in record time.
+            </p>
+            <hr style="opacity: 0.1; margin: 1.5rem 0;">
+            <ul style="color: #e0e0e0; list-style: none; padding-left: 0;">
+                <li style="margin-bottom: 0.8rem;">✨ <b>Neural Architecture:</b> Parallel family-based execution</li>
+                <li style="margin-bottom: 0.8rem;">✨ <b>Smart Preprocessing:</b> Context-aware feature scaling</li>
+                <li style="margin-bottom: 0.8rem;">✨ <b>NLP Engine:</b> Semantic vectorization with Word2Vec</li>
+                <li style="margin-bottom: 0.8rem;">✨ <b>MLOps Ready:</b> One-click model export and deployment</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div style="background: rgba(255,255,255,0.03); padding: 2rem; border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.05);">
+            <h3 style="color: #4facfe; margin-top: 0;">🎯 Engine Core</h3>
+            <div style="margin-bottom: 1.5rem;">
+                <b style="color: #00f2fe;">REGRESSION</b><br>
+                <span style="color: #a0a0a0; font-size: 0.9rem;">Weight-Based • Tree-Based • Neural Nets • Instance</span>
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <b style="color: #00f2fe;">CLASSIFICATION</b><br>
+                <span style="color: #a0a0a0; font-size: 0.9rem;">Logistic • GBM • XGBoost • LightGBM • SVC</span>
+            </div>
+            <div>
+                <b style="color: #00f2fe;">NATURAL LANGUAGE</b><br>
+                <span style="color: #a0a0a0; font-size: 0.9rem;">Semantic Embeddings • TF-IDF • N-Grams</span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
 def show_train_page():
     st.header("📊 Train Models")
@@ -514,10 +582,10 @@ def display_classification_results(df_success: pd.DataFrame):
             f1_val = row.get('f1_score', 0) if row.get('f1_score') is not None else 0
             st.markdown(f"""
             <div class="metric-card">
-                <h4>#{idx+1} {row['model_name']}</h4>
-                <p><b>Accuracy:</b> {acc_val:.4f}</p>
-                <p><b>Precision:</b> {prec_val:.4f}</p>
-                <p><b>F1 Score:</b> {f1_val:.4f}</p>
+                <h4>{row['model_name']}</h4>
+                <p>Accuracy</p>
+                <div class="metric-value">{acc_val:.4f}</div>
+                <p>F1 Score: <b>{f1_val:.4f}</b></p>
             </div>
             """, unsafe_allow_html=True)
             

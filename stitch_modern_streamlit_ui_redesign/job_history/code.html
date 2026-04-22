@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Job History - ML_Ops Core</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-fixed-dim": "#adc6ff",
+                      "tertiary-fixed": "#ffddb8",
+                      "on-tertiary-fixed": "#2a1700",
+                      "surface-container-high": "#222a3d",
+                      "on-surface-variant": "#c2c6d6",
+                      "surface-container-highest": "#2d3449",
+                      "inverse-on-surface": "#283044",
+                      "on-background": "#dae2fd",
+                      "on-primary": "#002e6a",
+                      "surface-dim": "#0b1326",
+                      "surface": "#0b1326",
+                      "secondary-fixed-dim": "#4fdbc8",
+                      "error-container": "#93000a",
+                      "on-tertiary-container": "#3e2400",
+                      "primary": "#adc6ff",
+                      "primary-container": "#4d8eff",
+                      "inverse-surface": "#dae2fd",
+                      "tertiary-container": "#ca8100",
+                      "secondary-fixed": "#71f8e4",
+                      "surface-variant": "#2d3449",
+                      "on-tertiary": "#472a00",
+                      "secondary": "#4fdbc8",
+                      "secondary-container": "#04b4a2",
+                      "on-secondary-fixed": "#00201c",
+                      "surface-tint": "#adc6ff",
+                      "outline": "#8c909f",
+                      "on-tertiary-fixed-variant": "#653e00",
+                      "surface-container-low": "#131b2e",
+                      "inverse-primary": "#005ac2",
+                      "on-primary-container": "#00285d",
+                      "surface-container": "#171f33",
+                      "tertiary-fixed-dim": "#ffb95f",
+                      "on-secondary": "#003731",
+                      "tertiary": "#ffb95f",
+                      "on-primary-fixed": "#001a42",
+                      "on-error": "#690005",
+                      "on-primary-fixed-variant": "#004395",
+                      "on-secondary-fixed-variant": "#005048",
+                      "on-secondary-container": "#003f38",
+                      "error": "#ffb4ab",
+                      "surface-container-lowest": "#060e20",
+                      "primary-fixed": "#d8e2ff",
+                      "surface-bright": "#31394d",
+                      "on-surface": "#dae2fd",
+                      "outline-variant": "#424754",
+                      "background": "#0b1326",
+                      "on-error-container": "#ffdad6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "sm": "8px",
+                      "xl": "32px",
+                      "margin": "40px",
+                      "unit": "4px",
+                      "md": "16px",
+                      "gutter": "24px",
+                      "lg": "24px",
+                      "xs": "4px"
+              },
+              "fontFamily": {
+                      "body-lg": ["Inter"],
+                      "h3": ["Inter"],
+                      "h2": ["Inter"],
+                      "h1": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "mono-data": ["Space Grotesk"],
+                      "display": ["Inter"],
+                      "label-caps": ["Space Grotesk"],
+                      "body-md": ["Inter"]
+              },
+              "fontSize": {
+                      "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                      "h3": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "h2": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                      "h1": ["30px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                      "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                      "mono-data": ["14px", {"lineHeight": "1.5", "fontWeight": "500"}],
+                      "display": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        body {
+            background-color: #0b1326; /* Level 0 Base */
+        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+    </style>
+</head>
+<body class="font-body-md text-on-background selection:bg-primary/30 antialiased">
+<!-- Sidebar Navigation Shell -->
+<aside class="fixed left-0 top-0 h-full w-60 border-r border-slate-800 bg-slate-900 z-40 hidden md:flex flex-col h-full py-6">
+<div class="px-6 mb-10">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-primary-container rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container text-sm">hub</span>
+</div>
+<div>
+<h2 class="text-lg font-black text-white leading-none">ML Pipeline</h2>
+<p class="text-[10px] text-slate-500 font-label-caps uppercase tracking-widest mt-1">Enterprise v2.4</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-all rounded-lg font-body-sm font-medium" href="#">
+<span class="material-symbols-outlined text-lg">dashboard</span>
+<span>Home</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-all rounded-lg font-body-sm font-medium" href="#">
+<span class="material-symbols-outlined text-lg">model_training</span>
+<span>Train Models</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-all rounded-lg font-body-sm font-medium" href="#">
+<span class="material-symbols-outlined text-lg">analytics</span>
+<span>View Results</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2.5 bg-blue-500/10 text-blue-400 border-r-2 border-blue-500 transition-all font-body-sm font-medium" href="#">
+<span class="material-symbols-outlined text-lg">history</span>
+<span>Job History</span>
+</a>
+</nav>
+<div class="px-4 pt-6 mt-6 border-t border-slate-800 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-all rounded font-body-sm" href="#">
+<span class="material-symbols-outlined text-lg">description</span>
+<span>Docs</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-all rounded font-body-sm" href="#">
+<span class="material-symbols-outlined text-lg">cloud_done</span>
+<span>Cloud Status</span>
+</a>
+</div>
+</aside>
+<!-- Top AppBar Shell -->
+<header class="fixed top-0 right-0 left-0 md:left-60 bg-slate-950/90 backdrop-blur-md z-50 border-b border-slate-800 shadow-sm">
+<div class="flex justify-between items-center w-full px-6 h-16">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold tracking-tighter text-white">ML_Ops Core</span>
+<div class="hidden sm:flex items-center gap-2 text-slate-500 px-3 py-1 bg-slate-900 border border-slate-800 rounded-lg">
+<span class="text-xs font-label-caps">PROD_NODE_01</span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<!-- Search Bar -->
+<div class="relative hidden lg:block">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-lg">search</span>
+<input class="bg-slate-900/50 border border-slate-800 text-slate-300 text-sm rounded-lg pl-10 pr-4 py-1.5 w-64 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="Global node search..." type="text"/>
+</div>
+<div class="flex items-center gap-3">
+<button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-100 transition-colors duration-200 hover:bg-slate-800/50 rounded-lg active:scale-95 duration-150">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-100 transition-colors duration-200 hover:bg-slate-800/50 rounded-lg active:scale-95 duration-150">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-100 transition-colors duration-200 hover:bg-slate-800/50 rounded-lg active:scale-95 duration-150">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="h-6 w-[1px] bg-slate-800 mx-1"></div>
+<img alt="User Profile Avatar" class="w-8 h-8 rounded-full border border-slate-700 object-cover" data-alt="Close up portrait of a professional man with neutral expression, soft studio lighting, blurred tech office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCyG4UjRtyBV1X5HKNvBoqu5jBWJA8Z_meOd87QOlMvT3w3b00Uqs5_46dOCdBMeg0dKxo0yjdaTbpxoQxiTWSi26eopjbC_hp-z-_luoRX3ifGvoVA2fos_9nvY9vU8c5TLabtnniIA-YqyYRltueh3O7AMM04FtoaOgYj7FHITMyx5Lr1VbYuyCd4s82Si5S4mxFg3gaHhVCmO77Jebq2HUB6gGr_WLKl9237fRQjSQ1ZUvOQKdqcmZH7m_hqdDN9MuncgR5H"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Content Canvas -->
+<main class="pt-24 pb-12 px-gutter md:ml-60">
+<div class="max-w-[1400px] mx-auto space-y-gutter">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-gutter">
+<div>
+<nav class="flex items-center gap-2 text-slate-500 mb-2 font-label-caps">
+<span>PIPELINE</span>
+<span class="material-symbols-outlined text-xs">chevron_right</span>
+<span class="text-blue-400">JOB_HISTORY</span>
+</nav>
+<h1 class="font-display text-display text-on-background">Training Log</h1>
+<p class="text-on-surface-variant font-body-md mt-1">Overview of all historical model training executions and performance snapshots.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 px-4 py-2 rounded-lg transition-all active:scale-95">
+<span class="material-symbols-outlined text-lg">download</span>
+<span class="font-label-caps">EXPORT CSV</span>
+</button>
+<button class="flex items-center gap-2 bg-primary-container text-on-primary-container hover:brightness-110 px-4 py-2 rounded-lg font-semibold shadow-lg shadow-blue-500/20 transition-all active:scale-95">
+<span class="material-symbols-outlined text-lg">add</span>
+<span class="font-label-caps text-on-primary">NEW JOB</span>
+</button>
+</div>
+</div>
+<!-- Dashboard Logic Bar (Search & Filter) -->
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-gutter items-center bg-surface-container-low p-gutter rounded-xl border border-outline-variant">
+<div class="lg:col-span-2 relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">search</span>
+<input class="w-full bg-background border border-outline-variant text-on-surface text-sm rounded-lg pl-12 pr-4 py-3 focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all" placeholder="Filter by Job ID, model type or dataset..." type="text"/>
+</div>
+<div class="relative">
+<select class="w-full bg-background border border-outline-variant text-on-surface text-sm rounded-lg px-4 py-3 appearance-none focus:ring-1 focus:ring-primary outline-none cursor-pointer">
+<option>Status: All Jobs</option>
+<option>Completed</option>
+<option>Failed</option>
+<option>Running</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">filter_list</span>
+</div>
+<div class="relative">
+<select class="w-full bg-background border border-outline-variant text-on-surface text-sm rounded-lg px-4 py-3 appearance-none focus:ring-1 focus:ring-primary outline-none cursor-pointer">
+<option>Last 30 Days</option>
+<option>Last 7 Days</option>
+<option>Last 24 Hours</option>
+<option>Custom Range</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">calendar_today</span>
+</div>
+</div>
+<!-- Job History Table Card -->
+<div class="bg-surface border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+<div class="overflow-x-auto custom-scrollbar">
+<table class="w-full border-collapse">
+<thead>
+<tr class="bg-surface-container-highest/50 border-b border-outline-variant">
+<th class="text-left px-6 py-4 font-label-caps text-on-surface-variant uppercase tracking-wider">Job ID</th>
+<th class="text-left px-6 py-4 font-label-caps text-on-surface-variant uppercase tracking-wider">Model Type</th>
+<th class="text-left px-6 py-4 font-label-caps text-on-surface-variant uppercase tracking-wider">Dataset</th>
+<th class="text-left px-6 py-4 font-label-caps text-on-surface-variant uppercase tracking-wider">Status</th>
+<th class="text-left px-6 py-4 font-label-caps text-on-surface-variant uppercase tracking-wider">Duration</th>
+<th class="text-left px-6 py-4 font-label-caps text-on-surface-variant uppercase tracking-wider">Date</th>
+<th class="text-right px-6 py-4 font-label-caps text-on-surface-variant uppercase tracking-wider">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Row 1: Completed -->
+<tr class="hover:bg-surface-container-high/30 transition-colors group">
+<td class="px-6 py-4 font-mono-data text-on-surface">#J-89421</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">psychology</span>
+<span class="text-on-surface font-medium">BERT-Transformer-v2</span>
+</div>
+</td>
+<td class="px-6 py-4 text-on-surface-variant text-sm">NLP_Global_Corpus_v4</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 bg-secondary-container/10 text-secondary-container px-2 py-1 rounded text-xs font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+                                        Completed
+                                    </span>
+</td>
+<td class="px-6 py-4 font-mono-data text-on-surface text-sm">04h 22m 11s</td>
+<td class="px-6 py-4 text-on-surface-variant text-sm">Oct 24, 2023</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 text-slate-400 hover:text-primary transition-colors" title="View Results">
+<span class="material-symbols-outlined text-lg">visibility</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-secondary-fixed-dim transition-colors" title="Clone Configuration">
+<span class="material-symbols-outlined text-lg">content_copy</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-error transition-colors" title="Delete">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2: Failed -->
+<tr class="hover:bg-surface-container-high/30 transition-colors group">
+<td class="px-6 py-4 font-mono-data text-on-surface">#J-89419</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">image</span>
+<span class="text-on-surface font-medium">ResNet-101-Backbone</span>
+</div>
+</td>
+<td class="px-6 py-4 text-on-surface-variant text-sm">ImageNet_Subset_20k</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 bg-error-container/10 text-error px-2 py-1 rounded text-xs font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                                        Failed
+                                    </span>
+</td>
+<td class="px-6 py-4 font-mono-data text-on-surface text-sm">00h 12m 45s</td>
+<td class="px-6 py-4 text-on-surface-variant text-sm">Oct 24, 2023</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2">
+<button class="p-1.5 text-slate-400 hover:text-primary transition-colors" title="View Logs">
+<span class="material-symbols-outlined text-lg">terminal</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-secondary-fixed-dim transition-colors" title="Clone Configuration">
+<span class="material-symbols-outlined text-lg">content_copy</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-error transition-colors" title="Delete">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3: Running -->
+<tr class="hover:bg-surface-container-high/30 transition-colors group">
+<td class="px-6 py-4 font-mono-data text-on-surface">#J-89425</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">timeline</span>
+<span class="text-on-surface font-medium">LSTM-Forecast-Agg</span>
+</div>
+</td>
+<td class="px-6 py-4 text-on-surface-variant text-sm">Market_TS_Data_v9</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 bg-tertiary-container/10 text-tertiary px-2 py-1 rounded text-xs font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary animate-pulse"></span>
+                                        Running
+                                    </span>
+</td>
+<td class="px-6 py-4 font-mono-data text-on-surface text-sm">01h 05m 22s</td>
+<td class="px-6 py-4 text-on-surface-variant text-sm">Oct 25, 2023</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2">
+<button class="p-1.5 text-primary animate-pulse transition-colors" title="View Live Stats">
+<span class="material-symbols-outlined text-lg">monitoring</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-secondary-fixed-dim transition-colors" title="Clone Configuration">
+<span class="material-symbols-outlined text-lg">content_copy</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-error transition-colors" title="Terminate">
+<span class="material-symbols-outlined text-lg">cancel</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4: Completed -->
+<tr class="hover:bg-surface-container-high/30 transition-colors group">
+<td class="px-6 py-4 font-mono-data text-on-surface">#J-89412</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-lg">grid_view</span>
+<span class="text-on-surface font-medium">AutoEncoder-Anomaly</span>
+</div>
+</td>
+<td class="px-6 py-4 text-on-surface-variant text-sm">Sensor_Metrics_Logs_Q3</td>
+<td class="px-6 py-4">
+<span class="inline-flex items-center gap-1.5 bg-secondary-container/10 text-secondary-container px-2 py-1 rounded text-xs font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+                                        Completed
+                                    </span>
+</td>
+<td class="px-6 py-4 font-mono-data text-on-surface text-sm">00h 45m 02s</td>
+<td class="px-6 py-4 text-on-surface-variant text-sm">Oct 23, 2023</td>
+<td class="px-6 py-4 text-right">
+<div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 text-slate-400 hover:text-primary transition-colors" title="View Results">
+<span class="material-symbols-outlined text-lg">visibility</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-secondary-fixed-dim transition-colors" title="Clone Configuration">
+<span class="material-symbols-outlined text-lg">content_copy</span>
+</button>
+<button class="p-1.5 text-slate-400 hover:text-error transition-colors" title="Delete">
+<span class="material-symbols-outlined text-lg">delete</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination / Footer -->
+<div class="px-6 py-4 flex items-center justify-between border-t border-outline-variant bg-surface-container-low">
+<span class="text-sm text-on-surface-variant font-body-sm">Showing <span class="text-on-surface font-medium">1-10</span> of 248 jobs</span>
+<div class="flex items-center gap-1">
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-slate-500 hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-primary bg-primary/10 text-primary font-medium text-xs">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-slate-400 hover:bg-slate-800 transition-colors text-xs">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-slate-400 hover:bg-slate-800 transition-colors text-xs">3</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant text-slate-500 hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Contextual Insights Section (Asymmetric Layout) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<div class="md:col-span-2 bg-surface border border-outline-variant rounded-xl p-gutter">
+<h3 class="text-h3 font-h3 text-on-surface mb-4">Node Resource Allocation</h3>
+<div class="h-48 flex items-end gap-4 px-2">
+<!-- Simulated Bar Chart -->
+<div class="flex-1 bg-surface-container-highest rounded-t group relative">
+<div class="absolute bottom-0 w-full bg-primary h-[40%] rounded-t transition-all group-hover:brightness-110"></div>
+<div class="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-xs px-2 py-1 rounded border border-slate-700">40%</div>
+</div>
+<div class="flex-1 bg-surface-container-highest rounded-t group relative">
+<div class="absolute bottom-0 w-full bg-primary h-[85%] rounded-t transition-all group-hover:brightness-110"></div>
+<div class="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-xs px-2 py-1 rounded border border-slate-700">85%</div>
+</div>
+<div class="flex-1 bg-surface-container-highest rounded-t group relative">
+<div class="absolute bottom-0 w-full bg-primary h-[62%] rounded-t transition-all group-hover:brightness-110"></div>
+<div class="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-xs px-2 py-1 rounded border border-slate-700">62%</div>
+</div>
+<div class="flex-1 bg-surface-container-highest rounded-t group relative">
+<div class="absolute bottom-0 w-full bg-primary h-[25%] rounded-t transition-all group-hover:brightness-110"></div>
+<div class="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-xs px-2 py-1 rounded border border-slate-700">25%</div>
+</div>
+<div class="flex-1 bg-surface-container-highest rounded-t group relative">
+<div class="absolute bottom-0 w-full bg-primary h-[70%] rounded-t transition-all group-hover:brightness-110"></div>
+<div class="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-900 text-xs px-2 py-1 rounded border border-slate-700">70%</div>
+</div>
+</div>
+<div class="flex justify-between mt-4 text-[10px] font-label-caps text-on-surface-variant px-2">
+<span>NODE A</span>
+<span>NODE B</span>
+<span>NODE C</span>
+<span>NODE D</span>
+<span>NODE E</span>
+</div>
+</div>
+<div class="bg-surface border border-outline-variant rounded-xl p-gutter flex flex-col justify-between">
+<div>
+<h3 class="text-h3 font-h3 text-on-surface mb-2">Failure Analysis</h3>
+<p class="text-sm text-on-surface-variant mb-6">Common reasons for job termination in the last 24 hours.</p>
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<span class="text-xs font-medium text-slate-400">Out of Memory</span>
+<span class="text-xs font-mono-data text-error">42%</span>
+</div>
+<div class="w-full bg-surface-container-low h-1 rounded-full overflow-hidden">
+<div class="bg-error h-full w-[42%]"></div>
+</div>
+<div class="flex items-center justify-between mt-4">
+<span class="text-xs font-medium text-slate-400">Network Timeout</span>
+<span class="text-xs font-mono-data text-error">18%</span>
+</div>
+<div class="w-full bg-surface-container-low h-1 rounded-full overflow-hidden">
+<div class="bg-error/60 h-full w-[18%]"></div>
+</div>
+</div>
+</div>
+<button class="w-full py-2 bg-background border border-outline-variant hover:border-error/50 hover:text-error transition-all rounded text-xs font-label-caps mt-8">
+                        CLEAR LOG ERROR CACHE
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Contextual FAB (Hidden on this transactional page per instructions) -->
+</body></html>

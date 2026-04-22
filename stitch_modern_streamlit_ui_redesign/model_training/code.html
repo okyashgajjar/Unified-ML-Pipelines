@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Train Models - ML_Ops Core</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#adc6ff",
+                    "tertiary-fixed": "#ffddb8",
+                    "on-tertiary-fixed": "#2a1700",
+                    "surface-container-high": "#222a3d",
+                    "on-surface-variant": "#c2c6d6",
+                    "surface-container-highest": "#2d3449",
+                    "inverse-on-surface": "#283044",
+                    "on-background": "#dae2fd",
+                    "on-primary": "#002e6a",
+                    "surface-dim": "#0b1326",
+                    "surface": "#0b1326",
+                    "secondary-fixed-dim": "#4fdbc8",
+                    "error-container": "#93000a",
+                    "on-tertiary-container": "#3e2400",
+                    "primary": "#adc6ff",
+                    "primary-container": "#4d8eff",
+                    "inverse-surface": "#dae2fd",
+                    "tertiary-container": "#ca8100",
+                    "secondary-fixed": "#71f8e4",
+                    "surface-variant": "#2d3449",
+                    "on-tertiary": "#472a00",
+                    "secondary": "#4fdbc8",
+                    "secondary-container": "#04b4a2",
+                    "on-secondary-fixed": "#00201c",
+                    "surface-tint": "#adc6ff",
+                    "outline": "#8c909f",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "surface-container-low": "#131b2e",
+                    "inverse-primary": "#005ac2",
+                    "on-primary-container": "#00285d",
+                    "surface-container": "#171f33",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "on-secondary": "#003731",
+                    "tertiary": "#ffb95f",
+                    "on-primary-fixed": "#001a42",
+                    "on-error": "#690005",
+                    "on-primary-fixed-variant": "#004395",
+                    "on-secondary-fixed-variant": "#005048",
+                    "on-secondary-container": "#003f38",
+                    "error": "#ffb4ab",
+                    "surface-container-lowest": "#060e20",
+                    "primary-fixed": "#d8e2ff",
+                    "surface-bright": "#31394d",
+                    "on-surface": "#dae2fd",
+                    "outline-variant": "#424754",
+                    "background": "#0b1326",
+                    "on-error-container": "#ffdad6"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "sm": "8px",
+                    "xl": "32px",
+                    "margin": "40px",
+                    "unit": "4px",
+                    "md": "16px",
+                    "gutter": "24px",
+                    "lg": "24px",
+                    "xs": "4px"
+            },
+            "fontFamily": {
+                    "body-lg": ["Inter"],
+                    "h3": ["Inter"],
+                    "h2": ["Inter"],
+                    "h1": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "mono-data": ["Space Grotesk"],
+                    "display": ["Inter"],
+                    "label-caps": ["Space Grotesk"],
+                    "body-md": ["Inter"]
+            },
+            "fontSize": {
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "h3": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "h2": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                    "h1": ["30px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "mono-data": ["14px", {"lineHeight": "1.5", "fontWeight": "500"}],
+                    "display": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #0b1326;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #adc6ff;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(173, 198, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md">
+<!-- TopAppBar from JSON Shared Components -->
+<header class="bg-slate-950/90 dark:bg-slate-950/90 backdrop-blur-md font-sans antialiased text-slate-200 fixed top-0 z-50 border-b border-slate-800 dark:border-slate-800 shadow-sm dark:shadow-none flex justify-between items-center w-full px-6 h-16">
+<div class="flex items-center gap-gutter">
+<span class="text-xl font-bold tracking-tighter text-white dark:text-white">ML_Ops Core</span>
+<nav class="hidden md:flex gap-md">
+<a class="text-slate-400 hover:text-slate-100 transition-colors duration-200 hover:bg-slate-800/50 px-3 py-1 rounded" href="#">Overview</a>
+<a class="text-blue-500 font-semibold transition-colors duration-200 hover:bg-slate-800/50 px-3 py-1 rounded" href="#">Train Models</a>
+<a class="text-slate-400 hover:text-slate-100 transition-colors duration-200 hover:bg-slate-800/50 px-3 py-1 rounded" href="#">Models</a>
+</nav>
+</div>
+<div class="flex items-center gap-md">
+<div class="bg-surface-container-high rounded-full px-4 py-1 flex items-center border border-outline-variant">
+<span class="material-symbols-outlined text-outline text-sm mr-2">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-sm placeholder-outline-variant w-48" placeholder="Search resources..." type="text"/>
+</div>
+<div class="flex gap-sm">
+<button class="material-symbols-outlined text-slate-400 hover:text-slate-100 transition-colors">notifications</button>
+<button class="material-symbols-outlined text-slate-400 hover:text-slate-100 transition-colors">settings</button>
+<button class="material-symbols-outlined text-slate-400 hover:text-slate-100 transition-colors">help</button>
+</div>
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center overflow-hidden border border-primary">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="professional corporate avatar of a technical engineer with clean background soft studio lighting minimalist" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw7qDjZsEAllQDHMSXt6v3B4P6L1yMEhwbWmSBGlvcfSuokrOEXvZem3Y8TgmAoJ4sabpMQb3gDXeUkN2DVJBeRRd9l6zm_6GHXt-n2IRwCts__DePqUV6RsE6ZDgDmn28vak0YY5TbGRNi15hbzdLIqRkqL2ZXkhoVPc7W9fg-b_vsMxa0vl-zXrRYsnEiFqr5w3L9KdRbLI3FCsA1CC88yweuNNx1MjTHQ5Hd4MoYSXs9B_Xv2b1Tsh17F7ifnMG05YjVIaj"/>
+</div>
+</div>
+</header>
+<!-- SideNavBar from JSON Shared Components -->
+<aside class="bg-slate-900 dark:bg-slate-900 fixed left-0 top-0 h-full w-60 border-r border-slate-800 dark:border-slate-800 flex flex-col h-full py-6 z-40">
+<div class="px-6 mb-8 flex flex-col">
+<span class="text-lg font-black text-white">ML Pipeline</span>
+<span class="text-xs text-slate-400 uppercase tracking-widest mt-1">Enterprise v2.4</span>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<div class="text-slate-400 hover:bg-slate-800 hover:text-slate-100 cursor-pointer active:opacity-80 transition-all font-sans font-medium text-sm flex items-center gap-3 px-3 py-3 rounded-lg group">
+<span class="material-symbols-outlined text-xl">dashboard</span>
+<span>Home</span>
+</div>
+<div class="bg-blue-500/10 text-blue-400 border-r-2 border-blue-500 cursor-pointer active:opacity-80 transition-all font-sans font-medium text-sm flex items-center gap-3 px-3 py-3 rounded-lg group">
+<span class="material-symbols-outlined text-xl" style="font-variation-settings: 'FILL' 1;">model_training</span>
+<span>Train Models</span>
+</div>
+<div class="text-slate-400 hover:bg-slate-800 hover:text-slate-100 cursor-pointer active:opacity-80 transition-all font-sans font-medium text-sm flex items-center gap-3 px-3 py-3 rounded-lg group">
+<span class="material-symbols-outlined text-xl">analytics</span>
+<span>View Results</span>
+</div>
+<div class="text-slate-400 hover:bg-slate-800 hover:text-slate-100 cursor-pointer active:opacity-80 transition-all font-sans font-medium text-sm flex items-center gap-3 px-3 py-3 rounded-lg group">
+<span class="material-symbols-outlined text-xl">history</span>
+<span>Job History</span>
+</div>
+</nav>
+<div class="px-4 mt-auto border-t border-slate-800 pt-6">
+<div class="text-slate-400 hover:bg-slate-800 hover:text-slate-100 cursor-pointer active:opacity-80 transition-all font-sans font-medium text-sm flex items-center gap-3 px-3 py-2 rounded-lg group">
+<span class="material-symbols-outlined text-xl">description</span>
+<span>Docs</span>
+</div>
+<div class="text-slate-400 hover:bg-slate-800 hover:text-slate-100 cursor-pointer active:opacity-80 transition-all font-sans font-medium text-sm flex items-center gap-3 px-3 py-2 rounded-lg group">
+<span class="material-symbols-outlined text-xl text-secondary">cloud_done</span>
+<span>Cloud Status</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="pl-64 pt-16 pr-8 pb-12 min-h-screen">
+<div class="max-w-6xl mx-auto py-xl">
+<!-- Header Section -->
+<div class="mb-gutter">
+<span class="font-label-caps text-label-caps text-primary mb-2 block uppercase">ML Pipeline Configurator</span>
+<h1 class="font-h1 text-h1 text-on-surface tracking-tight">Train Models</h1>
+<p class="text-on-surface-variant font-body-md mt-2">Define your data sources and hyperparameter weights for the next training iteration.</p>
+</div>
+<!-- Wizard Stepper (Visual Only) -->
+<div class="flex items-center mb-xl">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary font-bold text-sm">1</div>
+<span class="font-label-caps text-label-caps text-on-surface">Data Source</span>
+</div>
+<div class="h-px bg-outline-variant flex-1 mx-gutter"></div>
+<div class="flex items-center gap-3 opacity-50">
+<div class="w-8 h-8 rounded-full border border-outline flex items-center justify-center text-on-surface-variant font-bold text-sm">2</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Architecture</span>
+</div>
+<div class="h-px bg-outline-variant flex-1 mx-gutter"></div>
+<div class="flex items-center gap-3 opacity-50">
+<div class="w-8 h-8 rounded-full border border-outline flex items-center justify-center text-on-surface-variant font-bold text-sm">3</div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Review</span>
+</div>
+</div>
+<!-- Grid Layout -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Left Column: Source & Task -->
+<div class="col-span-12 lg:col-span-7 space-y-gutter">
+<!-- Section: Data Source Selection -->
+<section class="bg-surface-container border border-outline-variant rounded-lg p-lg shadow-sm">
+<div class="flex items-center justify-between mb-md">
+<h3 class="font-h3 text-h3 text-on-surface">Data Source Selection</h3>
+<span class="material-symbols-outlined text-outline">database</span>
+</div>
+<div class="grid grid-cols-2 gap-md">
+<button class="flex flex-col items-center justify-center p-xl border-2 border-primary bg-primary/5 rounded-lg group transition-all">
+<span class="material-symbols-outlined text-4xl text-primary mb-2" style="font-variation-settings: 'FILL' 1;">upload_file</span>
+<span class="font-label-caps text-label-caps text-primary uppercase">CSV Upload</span>
+<span class="text-xs text-on-surface-variant mt-1 text-center">Local or S3 compatible</span>
+</button>
+<button class="flex flex-col items-center justify-center p-xl border border-outline-variant bg-surface-container-low hover:bg-surface-container-high rounded-lg group transition-all">
+<span class="material-symbols-outlined text-4xl text-outline group-hover:text-primary mb-2">storage</span>
+<span class="font-label-caps text-label-caps text-on-surface uppercase">Database Link</span>
+<span class="text-xs text-on-surface-variant mt-1 text-center">SQL, PostgreSQL, MongoDB</span>
+</button>
+</div>
+<div class="mt-md p-md border border-dashed border-outline-variant rounded bg-surface-container-lowest">
+<div class="flex items-center justify-between text-body-sm mb-2">
+<span class="text-on-surface-variant">Active File: <span class="text-primary font-mono-data">v3_cleaned_dataset.csv</span></span>
+<span class="text-secondary font-mono-data">14.2 GB</span>
+</div>
+<div class="w-full bg-surface-container-high h-1 rounded-full overflow-hidden">
+<div class="bg-secondary h-full w-[100%]"></div>
+</div>
+</div>
+</section>
+<!-- Section: Task Selection -->
+<section class="bg-surface-container border border-outline-variant rounded-lg p-lg shadow-sm">
+<h3 class="font-h3 text-h3 text-on-surface mb-md">Learning Task</h3>
+<div class="flex gap-md bg-surface-container-low p-1 rounded-full border border-outline-variant">
+<button class="flex-1 py-3 rounded-full bg-primary text-on-primary font-label-caps text-label-caps uppercase transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">filter_list</span>
+                                Classification
+                            </button>
+<button class="flex-1 py-3 rounded-full hover:bg-surface-container-high text-on-surface-variant font-label-caps text-label-caps uppercase transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+                                Regression
+                            </button>
+</div>
+<div class="mt-md flex items-center gap-md p-md bg-surface-container-high/50 rounded-lg">
+<span class="material-symbols-outlined text-tertiary">info</span>
+<p class="text-body-sm text-on-surface-variant italic">Classification models predict discrete labels. Recommended for: Fraud detection, Image categorization.</p>
+</div>
+</section>
+</div>
+<!-- Right Column: Hyperparameters -->
+<div class="col-span-12 lg:col-span-5">
+<section class="bg-surface-container border border-outline-variant rounded-lg p-lg shadow-sm h-full sticky top-24">
+<div class="flex items-center justify-between mb-xl">
+<h3 class="font-h3 text-h3 text-on-surface">Hyperparameters</h3>
+<button class="text-primary hover:underline font-label-caps text-label-caps flex items-center gap-1">
+<span class="material-symbols-outlined text-sm">restart_alt</span> RESET
+                            </button>
+</div>
+<div class="space-y-xl">
+<!-- Learning Rate -->
+<div>
+<div class="flex justify-between mb-2">
+<label class="font-label-caps text-label-caps text-on-surface uppercase tracking-wider">Learning Rate</label>
+<span class="font-mono-data text-primary text-body-sm">0.0035</span>
+</div>
+<input class="w-full h-1 bg-surface-container-high rounded-lg appearance-none cursor-pointer accent-primary" type="range" value="35"/>
+<div class="flex justify-between mt-2 text-[10px] text-on-surface-variant font-mono-data">
+<span>0.0001</span>
+<span>0.1</span>
+</div>
+</div>
+<!-- Batch Size -->
+<div>
+<div class="flex justify-between mb-2">
+<label class="font-label-caps text-label-caps text-on-surface uppercase tracking-wider">Batch Size</label>
+<span class="font-mono-data text-primary text-body-sm">64</span>
+</div>
+<div class="grid grid-cols-4 gap-sm">
+<button class="bg-surface-container-low border border-outline-variant p-2 text-xs font-mono-data rounded hover:border-primary">16</button>
+<button class="bg-surface-container-low border border-outline-variant p-2 text-xs font-mono-data rounded hover:border-primary">32</button>
+<button class="bg-primary text-on-primary p-2 text-xs font-mono-data rounded">64</button>
+<button class="bg-surface-container-low border border-outline-variant p-2 text-xs font-mono-data rounded hover:border-primary">128</button>
+</div>
+</div>
+<!-- Epochs -->
+<div>
+<div class="flex justify-between mb-2">
+<label class="font-label-caps text-label-caps text-on-surface uppercase tracking-wider">Training Epochs</label>
+</div>
+<input class="w-full bg-surface-container-low border border-outline-variant rounded px-md py-sm font-mono-data text-primary focus:ring-1 focus:ring-primary focus:border-primary transition-all" type="number" value="150"/>
+<p class="text-[11px] text-on-surface-variant mt-2 italic">Calculated estimated runtime: <span class="text-secondary font-mono-data">~24m 12s</span></p>
+</div>
+<!-- Optimizer -->
+<div>
+<label class="font-label-caps text-label-caps text-on-surface uppercase tracking-wider block mb-2">Optimizer</label>
+<select class="w-full bg-surface-container-low border border-outline-variant rounded px-md py-sm font-body-sm text-on-surface focus:ring-1 focus:ring-primary focus:border-primary">
+<option>AdamW (Standard)</option>
+<option>SGD with Momentum</option>
+<option>RMSprop</option>
+<option>Adafactor</option>
+</select>
+</div>
+<!-- Start Button -->
+<div class="pt-gutter">
+<button class="w-full bg-primary hover:bg-primary-container text-on-primary py-xl rounded-lg font-h2 text-h2 flex items-center justify-center gap-3 transition-all transform active:scale-[0.98] shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+                                    Start Training
+                                </button>
+<p class="text-center text-[10px] text-on-surface-variant mt-4 font-label-caps tracking-widest">ESTIMATED GPU USAGE: 82% | NODE: US-EAST-1</p>
+</div>
+</div>
+</section>
+</div>
+</div>
+<!-- Pipeline Preview Section (Bento Grid Style) -->
+<div class="mt-xl grid grid-cols-3 gap-gutter">
+<div class="bg-surface-container border border-outline-variant rounded-lg p-md overflow-hidden">
+<span class="font-label-caps text-[10px] text-outline block mb-2 uppercase">Input Architecture</span>
+<div class="aspect-video bg-slate-950 rounded flex items-center justify-center relative">
+<img alt="Architecture Preview" class="w-full h-full object-cover opacity-50" data-alt="abstract geometric neural network nodes and connections glowing blue lines on dark tech background 3d render" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD2FcH1AfYikL9uRAjV6CUEX88XawZc7UdBFQArdRdwNwRW-Tw--PspPrX2iz32O0dUzHaiRapb_M9TBzAGx4BJwb-00rNuzhaYpNvI6-YZeuvja3QPBMYdsV722-8_gxM2wlWCXhJBzsQcAZaRqR9PXBt7-IoH-Wj2bNqPNh7qzlbdIDhs0wQ2X-tHS7LraUSPWvCTem9U5iu8-15zM-Z50qb78_cWOnZqGOCh7BZIEZdnjNYODIwnQiDOXnve6I2Y60B8YYDg"/>
+<span class="absolute text-xs font-mono-data text-white bg-slate-900/80 px-2 py-1 rounded">CNN_v4_ResNet</span>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant rounded-lg p-md">
+<span class="font-label-caps text-[10px] text-outline block mb-2 uppercase">Recent Metrics</span>
+<div class="space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-body-sm text-on-surface-variant">Avg. Accuracy</span>
+<span class="font-mono-data text-secondary">0.982</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-body-sm text-on-surface-variant">Last Loss</span>
+<span class="font-mono-data text-error">0.041</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-body-sm text-on-surface-variant">Latency</span>
+<span class="font-mono-data text-primary">12ms</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container border border-outline-variant rounded-lg p-md flex flex-col justify-center items-center text-center">
+<span class="material-symbols-outlined text-4xl text-outline-variant mb-2">history_edu</span>
+<h4 class="text-body-sm text-on-surface font-semibold">View Version History</h4>
+<p class="text-[11px] text-on-surface-variant mt-1">Audit changes to parameters before launching.</p>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar for Mobile Shell -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full bg-slate-950 border-t border-slate-800 flex justify-around items-center h-16 z-50 px-6">
+<button class="flex flex-col items-center text-slate-400">
+<span class="material-symbols-outlined">dashboard</span>
+</button>
+<button class="flex flex-col items-center text-blue-500">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">model_training</span>
+</button>
+<button class="flex flex-col items-center text-slate-400">
+<span class="material-symbols-outlined">analytics</span>
+</button>
+<button class="flex flex-col items-center text-slate-400">
+<span class="material-symbols-outlined">history</span>
+</button>
+</nav>
+</body></html>

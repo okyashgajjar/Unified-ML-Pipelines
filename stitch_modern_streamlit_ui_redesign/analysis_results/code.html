@@ -1,0 +1,402 @@
+<html class="dark"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "primary-fixed-dim": "#adc6ff",
+                  "tertiary-fixed": "#ffddb8",
+                  "on-tertiary-fixed": "#2a1700",
+                  "surface-container-high": "#222a3d",
+                  "on-surface-variant": "#c2c6d6",
+                  "surface-container-highest": "#2d3449",
+                  "inverse-on-surface": "#283044",
+                  "on-background": "#dae2fd",
+                  "on-primary": "#002e6a",
+                  "surface-dim": "#0b1326",
+                  "surface": "#0b1326",
+                  "secondary-fixed-dim": "#4fdbc8",
+                  "error-container": "#93000a",
+                  "on-tertiary-container": "#3e2400",
+                  "primary": "#adc6ff",
+                  "primary-container": "#4d8eff",
+                  "inverse-surface": "#dae2fd",
+                  "tertiary-container": "#ca8100",
+                  "secondary-fixed": "#71f8e4",
+                  "surface-variant": "#2d3449",
+                  "on-tertiary": "#472a00",
+                  "secondary": "#4fdbc8",
+                  "secondary-container": "#04b4a2",
+                  "on-secondary-fixed": "#00201c",
+                  "surface-tint": "#adc6ff",
+                  "outline": "#8c909f",
+                  "on-tertiary-fixed-variant": "#653e00",
+                  "surface-container-low": "#131b2e",
+                  "inverse-primary": "#005ac2",
+                  "on-primary-container": "#00285d",
+                  "surface-container": "#171f33",
+                  "tertiary-fixed-dim": "#ffb95f",
+                  "on-secondary": "#003731",
+                  "tertiary": "#ffb95f",
+                  "on-primary-fixed": "#001a42",
+                  "on-error": "#690005",
+                  "on-primary-fixed-variant": "#004395",
+                  "on-secondary-fixed-variant": "#005048",
+                  "on-secondary-container": "#003f38",
+                  "error": "#ffb4ab",
+                  "surface-container-lowest": "#060e20",
+                  "primary-fixed": "#d8e2ff",
+                  "surface-bright": "#31394d",
+                  "on-surface": "#dae2fd",
+                  "outline-variant": "#424754",
+                  "background": "#0b1326",
+                  "on-error-container": "#ffdad6"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.125rem",
+                  "lg": "0.25rem",
+                  "xl": "0.5rem",
+                  "full": "0.75rem"
+          },
+          "spacing": {
+                  "sm": "8px",
+                  "xl": "32px",
+                  "margin": "40px",
+                  "unit": "4px",
+                  "md": "16px",
+                  "gutter": "24px",
+                  "lg": "24px",
+                  "xs": "4px"
+          },
+          "fontFamily": {
+                  "body-lg": ["Inter"],
+                  "h3": ["Inter"],
+                  "h2": ["Inter"],
+                  "h1": ["Inter"],
+                  "body-sm": ["Inter"],
+                  "mono-data": ["Space Grotesk"],
+                  "display": ["Inter"],
+                  "label-caps": ["Space Grotesk"],
+                  "body-md": ["Inter"]
+          },
+          "fontSize": {
+                  "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                  "h3": ["20px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                  "h2": ["24px", {"lineHeight": "1.4", "fontWeight": "600"}],
+                  "h1": ["30px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                  "body-sm": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                  "mono-data": ["14px", {"lineHeight": "1.5", "fontWeight": "500"}],
+                  "display": ["36px", {"lineHeight": "1.2", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                  "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                  "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body {
+      background-color: #0b1326;
+      color: #dae2fd;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #131b2e;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #334155;
+    }
+  </style>
+</head>
+<body class="font-body-md antialiased overflow-hidden h-screen flex">
+<!-- SideNavBar Anchor -->
+<aside class="fixed left-0 top-0 h-full w-60 border-r border-slate-800 bg-slate-900 flex flex-col py-6 z-50">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">hub</span>
+</div>
+<div>
+<h2 class="text-lg font-black text-white leading-tight">ML Pipeline</h2>
+<p class="text-[10px] text-slate-500 font-label-caps">Enterprise v2.4</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<div class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-all cursor-pointer rounded">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-sans font-medium text-sm">Home</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-all cursor-pointer rounded">
+<span class="material-symbols-outlined" data-icon="model_training">model_training</span>
+<span class="font-sans font-medium text-sm">Train Models</span>
+</div>
+<!-- ACTIVE TAB: View Results -->
+<div class="flex items-center gap-3 px-3 py-2 bg-blue-500/10 text-blue-400 border-r-2 border-blue-500 transition-all cursor-pointer rounded-l">
+<span class="material-symbols-outlined" data-icon="analytics" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="font-sans font-medium text-sm">View Results</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-all cursor-pointer rounded">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span class="font-sans font-medium text-sm">Job History</span>
+</div>
+</nav>
+<div class="px-4 mt-auto pt-6 border-t border-slate-800">
+<div class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-all cursor-pointer rounded">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+<span class="font-sans font-medium text-sm">Docs</span>
+</div>
+<div class="flex items-center gap-3 px-3 py-2 text-slate-400 hover:bg-slate-800 hover:text-slate-100 transition-all cursor-pointer rounded">
+<span class="material-symbols-outlined" data-icon="cloud_done">cloud_done</span>
+<span class="font-sans font-medium text-sm">Cloud Status</span>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-60 flex-1 flex flex-col h-screen bg-background overflow-hidden">
+<!-- TopNavBar Anchor -->
+<header class="flex justify-between items-center w-full px-6 h-16 bg-slate-950/90 backdrop-blur-md border-b border-slate-800 shadow-sm z-40">
+<div class="flex items-center gap-4">
+<h1 class="text-xl font-bold tracking-tighter text-white">ML_Ops Core</h1>
+<div class="h-4 w-px bg-slate-700 mx-2"></div>
+<div class="flex items-center gap-2 px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-lg text-slate-400">
+<span class="material-symbols-outlined text-sm">search</span>
+<input class="bg-transparent border-none text-xs focus:ring-0 p-0 w-48 placeholder-slate-600" placeholder="Search experiments..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 text-slate-400 hover:bg-slate-800/50 transition-colors duration-200 rounded-full">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-2 text-slate-400 hover:bg-slate-800/50 transition-colors duration-200 rounded-full">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center overflow-hidden">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="professional user profile avatar with a clean minimalist aesthetic and subtle background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC55Z9pKkoemwVQmQfZi5VGWB27Vlf7iTX33l17V6TvFrcGRkOwp-fhM2E-f04SFcD2bn9iMz8qz6m-BHneQzsOTB88kctyxjwL504qMvBpC-jHHstnchhlIe2fHGIi-fTdDSu7shjB7VuLJkqcqTm9lil-6t_9_kSwTWEQnnWMXuVnNPtsdXgXs_JG7qCSL84MQxWVIFc8bhIS0CfvapeLKAdF5WYwqnCt2lfUUQ9-_nn4vN3AgPwFQNfkjQX0TrREGMQI0uMP"/>
+</div>
+</div>
+</header>
+<!-- Page Content -->
+<section class="flex-1 overflow-y-auto custom-scrollbar p-gutter space-y-gutter">
+<!-- Top Section: Metric Tiles & Summary Table (Asymmetric Bento) -->
+<div class="grid grid-cols-12 gap-gutter">
+<!-- Metrics Column -->
+<div class="col-span-12 lg:col-span-3 flex flex-col gap-gutter">
+<div class="bg-surface-container p-md rounded-lg border border-outline-variant">
+<p class="font-label-caps text-on-surface-variant uppercase tracking-widest mb-2">Model Accuracy</p>
+<div class="flex items-end justify-between">
+<span class="font-mono-data text-display text-primary">98.4<span class="text-h3">%</span></span>
+<span class="text-secondary flex items-center text-sm mb-2"><span class="material-symbols-outlined text-sm mr-1">trending_up</span>+1.2%</span>
+</div>
+</div>
+<div class="bg-surface-container p-md rounded-lg border border-outline-variant">
+<p class="font-label-caps text-on-surface-variant uppercase tracking-widest mb-2">Training Loss</p>
+<div class="flex items-end justify-between">
+<span class="font-mono-data text-display text-tertiary">0.042</span>
+<span class="text-error flex items-center text-sm mb-2"><span class="material-symbols-outlined text-sm mr-1">trending_down</span>-0.005</span>
+</div>
+</div>
+</div>
+<!-- Performance Metrics Table -->
+<div class="col-span-12 lg:col-span-9 bg-surface-container p-lg rounded-lg border border-outline-variant">
+<div class="flex items-center justify-between mb-lg">
+<h3 class="font-h3 text-on-surface">Performance Metrics Summary</h3>
+<span class="px-3 py-1 bg-secondary-container/20 text-secondary text-label-caps rounded-full border border-secondary/30">VALIDATION_SET_V4</span>
+</div>
+<table class="w-full border-collapse">
+<thead>
+<tr class="border-b border-outline-variant">
+<th class="text-left py-3 font-label-caps text-on-surface-variant">Class Label</th>
+<th class="text-right py-3 font-label-caps text-on-surface-variant">Precision</th>
+<th class="text-right py-3 font-label-caps text-on-surface-variant">Recall</th>
+<th class="text-right py-3 font-label-caps text-on-surface-variant">F1-Score</th>
+<th class="text-right py-3 font-label-caps text-on-surface-variant">Support</th>
+</tr>
+</thead>
+<tbody class="font-mono-data text-body-sm text-on-surface">
+<tr class="border-b border-outline-variant/30 hover:bg-surface-variant/20 transition-colors">
+<td class="py-4">Anomaly_Type_A</td>
+<td class="text-right">0.974</td>
+<td class="text-right">0.961</td>
+<td class="text-right">0.967</td>
+<td class="text-right text-on-surface-variant">1,240</td>
+</tr>
+<tr class="border-b border-outline-variant/30 hover:bg-surface-variant/20 transition-colors">
+<td class="py-4">Anomaly_Type_B</td>
+<td class="text-right">0.991</td>
+<td class="text-right">0.985</td>
+<td class="text-right">0.988</td>
+<td class="text-right text-on-surface-variant">892</td>
+</tr>
+<tr class="border-b border-outline-variant/30 hover:bg-surface-variant/20 transition-colors">
+<td class="py-4">System_Normal</td>
+<td class="text-right">0.998</td>
+<td class="text-right">0.999</td>
+<td class="text-right">0.999</td>
+<td class="text-right text-on-surface-variant">15,402</td>
+</tr>
+<tr class="hover:bg-surface-variant/20 transition-colors">
+<td class="py-4 font-bold">Weighted Avg</td>
+<td class="text-right font-bold text-primary">0.988</td>
+<td class="text-right font-bold text-primary">0.982</td>
+<td class="text-right font-bold text-primary">0.985</td>
+<td class="text-right text-on-surface-variant">17,534</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Middle Section: Training Trends (Line Chart) -->
+<div class="bg-surface-container p-lg rounded-lg border border-outline-variant">
+<div class="flex items-center justify-between mb-xl">
+<div>
+<h3 class="font-h3 text-on-surface">Training vs. Validation Convergence</h3>
+<p class="text-body-sm text-on-surface-variant">Loss and Accuracy progression over 100 Epochs</p>
+</div>
+<div class="flex gap-4">
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full bg-primary"></span>
+<span class="text-label-caps text-on-surface-variant">Training Accuracy</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="w-3 h-3 rounded-full border-2 border-primary-container"></span>
+<span class="text-label-caps text-on-surface-variant">Validation Accuracy</span>
+</div>
+</div>
+</div>
+<div class="h-64 w-full relative">
+<!-- Mock Chart SVG -->
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 1000 200">
+<!-- Grid Lines -->
+<line stroke="#334155" stroke-dasharray="4" x1="0" x2="1000" y1="0" y2="0"></line>
+<line stroke="#334155" stroke-dasharray="4" x1="0" x2="1000" y1="50" y2="50"></line>
+<line stroke="#334155" stroke-dasharray="4" x1="0" x2="1000" y1="100" y2="100"></line>
+<line stroke="#334155" stroke-dasharray="4" x1="0" x2="1000" y1="150" y2="150"></line>
+<line stroke="#334155" stroke-width="2" x1="0" x2="1000" y1="200" y2="200"></line>
+<!-- Training Curve -->
+<path d="M0,180 Q100,160 200,120 T400,80 T600,40 T800,20 T1000,15" fill="none" stroke="#adc6ff" stroke-width="3"></path>
+<!-- Validation Curve -->
+<path d="M0,185 Q100,170 200,135 T400,100 T600,60 T800,45 T1000,42" fill="none" stroke="#4d8eff" stroke-dasharray="8,4" stroke-width="2"></path>
+<!-- Focus Point -->
+<circle cx="800" cy="20" fill="#adc6ff" r="4"></circle>
+<line stroke="#adc6ff" stroke-dasharray="2" stroke-width="1" x1="800" x2="800" y1="20" y2="200"></line>
+</svg>
+<!-- Chart Labels -->
+<div class="absolute -left-8 top-0 h-full flex flex-col justify-between text-[10px] text-slate-500 font-mono-data">
+<span>1.0</span>
+<span>0.75</span>
+<span>0.5</span>
+<span>0.25</span>
+<span>0.0</span>
+</div>
+</div>
+<div class="mt-4 flex justify-between text-[10px] text-slate-500 font-mono-data">
+<span>Epoch 0</span>
+<span>Epoch 25</span>
+<span>Epoch 50</span>
+<span>Epoch 75</span>
+<span>Epoch 100</span>
+</div>
+</div>
+<!-- Bottom Section: Confusion Matrix & Feature Importance -->
+<div class="grid grid-cols-12 gap-gutter pb-xl">
+<!-- Confusion Matrix -->
+<div class="col-span-12 lg:col-span-6 bg-surface-container p-lg rounded-lg border border-outline-variant">
+<h3 class="font-h3 text-on-surface mb-lg">Confusion Matrix</h3>
+<div class="grid grid-cols-4 gap-2 text-center">
+<!-- Header Labels -->
+<div class=""></div>
+<div class="font-label-caps text-on-surface-variant py-2">Pred: A</div>
+<div class="font-label-caps text-on-surface-variant py-2">Pred: B</div>
+<div class="font-label-caps text-on-surface-variant py-2">Pred: N</div>
+<!-- Row 1 -->
+<div class="font-label-caps text-on-surface-variant flex items-center justify-end pr-4">True: A</div>
+<div class="bg-primary-container/80 text-on-primary-container h-16 flex items-center justify-center font-mono-data text-h3 rounded-sm">1191</div>
+<div class="bg-surface-container-high text-on-surface-variant h-16 flex items-center justify-center font-mono-data rounded-sm">42</div>
+<div class="bg-surface-container-high text-on-surface-variant h-16 flex items-center justify-center font-mono-data rounded-sm">7</div>
+<!-- Row 2 -->
+<div class="font-label-caps text-on-surface-variant flex items-center justify-end pr-4">True: B</div>
+<div class="bg-surface-container-high text-on-surface-variant h-16 flex items-center justify-center font-mono-data rounded-sm">13</div>
+<div class="bg-primary-container text-on-primary-container h-16 flex items-center justify-center font-mono-data text-h3 rounded-sm">878</div>
+<div class="bg-surface-container-high text-on-surface-variant h-16 flex items-center justify-center font-mono-data rounded-sm">1</div>
+<!-- Row 3 -->
+<div class="font-label-caps text-on-surface-variant flex items-center justify-end pr-4">True: N</div>
+<div class="bg-surface-container-high text-on-surface-variant h-16 flex items-center justify-center font-mono-data rounded-sm">4</div>
+<div class="bg-surface-container-high text-on-surface-variant h-16 flex items-center justify-center font-mono-data rounded-sm">11</div>
+<div class="bg-primary-container/90 text-on-primary-container h-16 flex items-center justify-center font-mono-data text-h3 rounded-sm">15387</div>
+</div>
+</div>
+<!-- Feature Importance -->
+<div class="col-span-12 lg:col-span-6 bg-surface-container p-lg rounded-lg border border-outline-variant">
+<h3 class="font-h3 text-on-surface mb-lg">Feature Importance (SHAP)</h3>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-label-caps text-on-surface-variant mb-1">
+<span>Signal_Variance_XYZ</span>
+<span class="font-mono-data">0.428</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary" style="width: 85.6%;"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-label-caps text-on-surface-variant mb-1">
+<span>Temporal_Lag_Correlation</span>
+<span class="font-mono-data">0.312</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container" style="width: 62.4%;"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-label-caps text-on-surface-variant mb-1">
+<span>Peak_Frequency_Amplitude</span>
+<span class="font-mono-data">0.194</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container/60" style="width: 38.8%;"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-label-caps text-on-surface-variant mb-1">
+<span>Entropy_Coefficient_V2</span>
+<span class="font-mono-data">0.054</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-outline" style="width: 10.8%;"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-label-caps text-on-surface-variant mb-1">
+<span>System_Uptime_Feature</span>
+<span class="font-mono-data">0.012</span>
+</div>
+<div class="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-outline" style="width: 2.4%;"></div>
+</div>
+</div>
+</div>
+<!-- Download Action -->
+<div class="mt-lg pt-lg border-t border-outline-variant flex justify-end">
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary font-label-caps rounded-lg hover:shadow-[0_0_15px_rgba(173,198,255,0.3)] transition-all active:scale-95">
+<span class="material-symbols-outlined text-sm">download</span>
+              EXPORT FULL REPORT
+            </button>
+</div>
+</div>
+</div>
+</section>
+</main>
+</body></html>
